@@ -112,15 +112,69 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Handle Google Authentication
+  // 4. Handle Official Google Identity Services (GSI)
   const btnGoogleAuth = document.getElementById('btn-google-auth');
+  const googleBtnContainer = document.getElementById('google-signin-btn-container');
+
+  async function initializeGoogleIdentityServices() {
+    try {
+      const res = await fetch('/api/auth/google/client-id');
+      const data = await res.json();
+      const clientId = data.clientId;
+
+      if (clientId && window.google && google.accounts && google.accounts.id) {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async (response) => {
+            try {
+              showToast('Verifying Google Account...', 'info');
+              await API.googleAuth({ credential: response.credential });
+              showToast('Welcome to DecisionVault!', 'success');
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 500);
+            } catch (err) {
+              showToast(err.message || 'Google Sign-In verification failed', 'error');
+            }
+          }
+        });
+
+        if (googleBtnContainer) {
+          google.accounts.id.renderButton(googleBtnContainer, {
+            theme: 'outline',
+            size: 'large',
+            width: 320,
+            text: 'continue_with',
+            shape: 'rectangular'
+          });
+          // Hide custom fallback button since official Google button is rendered
+          if (btnGoogleAuth) btnGoogleAuth.style.display = 'none';
+        }
+      }
+    } catch (e) {
+      console.warn('Google Identity Services initialization note:', e.message);
+    }
+  }
+
+  // Attempt GSI initialization once DOM and scripts are ready
+  if (window.google) {
+    initializeGoogleIdentityServices();
+  } else {
+    window.addEventListener('load', () => {
+      setTimeout(initializeGoogleIdentityServices, 300);
+    });
+  }
+
+  // Fallback handler if clicked when official client ID is not yet configured in environment
   if (btnGoogleAuth) {
     btnGoogleAuth.addEventListener('click', async () => {
-      // In local dev without Google Client ID, provide clean interactive prompt
-      const promptEmail = prompt('Enter your Google Account email for demonstration:', 'demo.user@gmail.com');
+      const promptEmail = prompt(
+        'Google OAuth Setup Note:\nTo use the official Google popup on your domain, add GOOGLE_CLIENT_ID to your environment variables.\n\nEnter your Google email to test Google Sign-In right now:',
+        'demo.user@gmail.com'
+      );
       if (!promptEmail) return;
 
-      const promptName = prompt('Enter your full name:', 'Google Explorer') || 'Google Explorer';
+      const promptName = prompt('Enter your name for your Google profile:', 'Google Explorer') || 'Google Explorer';
 
       try {
         btnGoogleAuth.disabled = true;

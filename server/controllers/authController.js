@@ -166,7 +166,28 @@ const loginGuest = async (req, res, next) => {
  */
 const googleAuth = async (req, res, next) => {
   try {
-    const { googleId, email, name } = req.body;
+    let { googleId, email, name, credential } = req.body;
+
+    // Decode Google ID Token if passed from official Google Identity Services
+    if (credential) {
+      try {
+        const base64Url = credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          Buffer.from(base64, 'base64')
+            .toString('utf-8')
+            .split('')
+            .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+        );
+        const googleUser = JSON.parse(jsonPayload);
+        googleId = googleUser.sub;
+        email = googleUser.email;
+        name = googleUser.name || googleUser.given_name || 'Google User';
+      } catch (err) {
+        console.error('Failed to parse Google ID token credential:', err.message);
+      }
+    }
 
     if (!email || !name) {
       return res.status(400).json({
@@ -218,6 +239,18 @@ const googleAuth = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+/**
+ * @desc    Get Google OAuth Client ID for frontend GSI button
+ * @route   GET /api/auth/google/client-id
+ * @access  Public
+ */
+const getGoogleClientId = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    clientId: process.env.GOOGLE_CLIENT_ID || ''
+  });
 };
 
 /**
@@ -346,6 +379,7 @@ module.exports = {
   loginUser,
   loginGuest,
   googleAuth,
+  getGoogleClientId,
   getMe,
   convertGuestToAccount
 };
