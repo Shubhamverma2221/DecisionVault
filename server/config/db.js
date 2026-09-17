@@ -10,6 +10,17 @@ const connectDB = async () => {
   if (isConnected || mongoose.connection.readyState === 1) {
     return mongoose.connection;
   }
+
+  if (!process.env.MONGODB_URI) {
+    console.error(`=========================================`);
+    console.error(` Error: MONGODB_URI is not defined in environment variables!`);
+    console.error(` Go to Vercel/Render -> Settings -> Environment Variables and add MONGODB_URI.`);
+    console.error(`=========================================`);
+    const err = new Error('Database connection failed: MONGODB_URI is missing in your deployment environment variables.');
+    err.status = 500;
+    throw err;
+  }
+
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI);
     isConnected = true;

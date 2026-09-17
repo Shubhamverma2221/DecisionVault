@@ -7,8 +7,10 @@ const connectDB = require('./config/db');
 // Load environment variables from .env file at the earliest entry point
 dotenv.config();
 
-// Connect to MongoDB Database
-connectDB();
+// Connect to MongoDB Database (in standard server mode)
+if (process.env.VERCEL !== '1') {
+  connectDB();
+}
 
 // Initialize the Express application
 const app = express();
@@ -36,7 +38,7 @@ app.use(express.static(path.join(__dirname, '../client')));
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 // Health check endpoint to verify that the server is alive and responding
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health'], (req, res) => {
   res.status(200).json({
     status: 'ok',
     message: 'DecisionVault Multi-User API is running',
@@ -52,14 +54,17 @@ app.get('/api/health', (req, res) => {
 // Authentication routes (Register, Login, Guest, Google, Me, Convert)
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 
 // Decision routes (CRUD, Favorites, Archive, Reviews, Lessons, Calendar, Export)
 const decisionRoutes = require('./routes/decisionRoutes');
 app.use('/api/decisions', decisionRoutes);
+app.use('/decisions', decisionRoutes);
 
 // Analytics routes (Overview metrics, Confidence calibration)
 const analyticsRoutes = require('./routes/analyticsRoutes');
 app.use('/api/analytics', analyticsRoutes);
+app.use('/analytics', analyticsRoutes);
 
 // =========================================
 // Error Handling Middleware
