@@ -120,7 +120,116 @@ const getDecisions = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Get single decision by ID
+ * @route   GET /api/decisions/:id
+ * @access  Public
+ */
+const getDecisionById = async (req, res, next) => {
+  try {
+    const decision = await Decision.findById(req.params.id);
+
+    // If no document was found with this valid ObjectId
+    if (!decision) {
+      return res.status(404).json({
+        success: false,
+        error: `Decision not found with ID: ${req.params.id}`
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: decision
+    });
+  } catch (error) {
+    // If req.params.id is an invalid ObjectId format, Mongoose throws CastError,
+    // which errorHandler intercepts and cleanly returns 404
+    next(error);
+  }
+};
+
+/**
+ * @desc    Update decision details (allowed only before review is submitted)
+ * @route   PUT /api/decisions/:id
+ * @access  Public
+ */
+const updateDecision = async (req, res, next) => {
+  try {
+    const decision = await Decision.findById(req.params.id);
+
+    if (!decision) {
+      return res.status(404).json({
+        success: false,
+        error: `Decision not found with ID: ${req.params.id}`
+      });
+    }
+
+    // Business Logic / Immutability Rule:
+    // Once a decision has been reviewed, its original premises, confidence,
+    // and expected outcome are permanently locked to preserve historical truth.
+    if (decision.review && decision.review.result) {
+      return res.status(400).json({
+        success: false,
+        error: 'Reviewed decisions cannot be modified. Historical integrity must be preserved.'
+      });
+    }
+
+    // Prevent direct manipulation of review object through standard PUT route
+    if (req.body.review !== undefined) {
+      delete req.body.review;
+    }
+
+    // Update with new: true (returns updated doc) and runValidators: true (enforces schema checks on updates)
+    const updatedDecision = await Decision.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: updatedDecision
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Delete a decision
+ * @route   DELETE /api/decisions/:id
+ * @access  Public
+ */
+const deleteDecision = async (req, res, next) => {
+  try {
+    const decision = await Decision.findById(req.params.id);
+
+    if (!decision) {
+      return res.status(404).json({
+        success: false,
+        error: `Decision not found with ID: ${req.params.id}`
+      });
+    }
+
+    await Decision.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Decision deleted successfully',
+      data: {}
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createDecision,
-  getDecisions
+  getDecisions,
+  getDecisionById,
+  updateDecision,
+  deleteDecision
 };
