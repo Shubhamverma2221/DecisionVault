@@ -19,6 +19,12 @@ const reviewSchema = new mongoose.Schema(
         message: '{VALUE} is not a valid result evaluation. Must be Achieved, Partially Achieved, or Not Achieved.'
       }
     },
+    outcomeScore: {
+      type: Number,
+      min: [1, 'Outcome score must be at least 1/10'],
+      max: [10, 'Outcome score cannot exceed 10/10'],
+      default: null
+    },
     lessonLearned: {
       type: String,
       required: [true, 'Lesson learned is required for review'],
@@ -31,15 +37,72 @@ const reviewSchema = new mongoose.Schema(
     }
   },
   {
-    _id: false // Embedded subdocuments do not need their own primary key
+    _id: false
   }
 );
 
 // =========================================
-// 2. Primary Decision Schema
+// 2. Decision Criteria Subdocument Schema
+// =========================================
+const criterionSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Criterion name is required'],
+      trim: true
+    },
+    weight: {
+      type: Number,
+      required: [true, 'Criterion weight is required'],
+      min: [1, 'Weight must be at least 1%'],
+      max: [100, 'Weight cannot exceed 100%']
+    },
+    scores: [
+      {
+        option: { type: String, required: true },
+        score: { type: Number, required: true, min: 1, max: 10 }
+      }
+    ]
+  },
+  {
+    _id: false
+  }
+);
+
+// =========================================
+// 3. Audit History Subdocument Schema
+// =========================================
+const auditEntrySchema = new mongoose.Schema(
+  {
+    action: {
+      type: String,
+      required: true
+    },
+    details: {
+      type: String,
+      default: ''
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now
+    }
+  },
+  {
+    _id: false
+  }
+);
+
+// =========================================
+// 4. Primary Decision Schema
 // =========================================
 const decisionSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'Decision must belong to a registered or guest user'],
+      index: true
+    },
     title: {
       type: String,
       required: [true, 'Decision title is required'],
@@ -55,10 +118,14 @@ const decisionSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Category is required'],
       enum: {
-        values: ['Technology', 'Career', 'Finance', 'Life', 'Product', 'Health', 'Other'],
+        values: ['Technology', 'Career', 'Finance', 'Education', 'Projects', 'Personal', 'Health', 'Other'],
         message: '{VALUE} is not a supported category'
       },
       default: 'Technology'
+    },
+    tags: {
+      type: [String],
+      default: []
     },
     options: {
       type: [String],
@@ -76,7 +143,6 @@ const decisionSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: function (val) {
-          // Verify that chosen option exists inside the options array
           return this.options && this.options.includes(val);
         },
         message: 'Selected option "{VALUE}" must be one of the considered options.'
@@ -104,48 +170,62 @@ const decisionSchema = new mongoose.Schema(
       type: Date,
       required: [true, 'Target review date is required']
     },
-    tags: {
-      type: [String],
+    criteria: {
+      type: [criterionSchema],
       default: []
+    },
+    calculatedScores: [
+      {
+        option: { type: String },
+        totalScore: { type: Number }
+      }
+    ],
+    isFavorite: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
+    isArchived: {
+      type: Boolean,
+      default: false,
+      index: true
     },
     review: {
       type: reviewSchema,
       default: null
+    },
+    auditHistory: {
+      type: [auditEntrySchema],
+      default: []
     }
   },
   {
-    timestamps: true, // Automatically injects and updates createdAt and updatedAt
-    toJSON: { virtuals: true }, // Ensure virtual properties (like status) are serialized to JSON
+    timestamps: true,
+    toJSON: { virtuals: true },
     toObject: { virtuals: true }
   }
 );
 
-// =========================================
-// 3. Virtual Field: Dynamic Decision Lifecycle Status
-// =========================================
-// Status is dynamically computed based on current time and review presence.
-// Eliminates brittle manual status updates in the database.
+// Dynamic lifecycle virtual getter for Status
 decisionSchema.virtual('status').get(function () {
+  if (this.isArchived) {
+    return 'Archived';
+  }
   if (this.review && this.review.result) {
     return 'Reviewed';
   }
   const now = new Date();
-  if (now >= new Date(this.reviewDate)) {
+  if (now >= this.reviewDate) {
     return 'Review Due';
   }
   return 'Pending Review';
 });
 
-// =========================================
-// 4. Performance Indexes
-// =========================================
-decisionSchema.index({ reviewDate: 1 });
-decisionSchema.index({ createdAt: -1 });
-decisionSchema.index({ category: 1 });
+// Compound Indexes for User Scoping and High Performance Queries
+decisionSchema.index({ userId: 1, isArchived: 1, createdAt: -1 });
+decisionSchema.index({ userId: 1, reviewDate: 1 });
+decisionSchema.index({ userId: 1, isFavorite: 1 });
+decisionSchema.index({ userId: 1, category: 1 });
+decisionSchema.index({ userId: 1, tags: 1 });
 
-// =========================================
-// 5. Compile Model
-// =========================================
-const Decision = mongoose.model('Decision', decisionSchema);
-
-module.exports = Decision;
+module.exports = mongoose.model('Decision', decisionSchema);

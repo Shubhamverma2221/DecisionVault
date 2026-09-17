@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="DecisionVault — Document your reasoning, lock your expectations, and review the history of your decisions.">
-  <title>DecisionVault — Your Decisions Have a History</title>
+  <meta name="description" content="DecisionVault — Your Decisions Have a History. Document hypotheses, evaluate empirical outcomes, and calibrate cognitive confidence.">
+  <title>Dashboard — DecisionVault</title>
 
-  <!-- Google Fonts: Outfit & Inter -->
+  <!-- Google Fonts: Outfit, Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- Core Stylesheets -->
+  <!-- Core Stylesheets (Light Mode Only) -->
   <link rel="stylesheet" href="/css/variables.css">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/components.css">
@@ -28,137 +28,144 @@
       <nav>
         <ul class="nav-links">
           <li><a href="/" class="nav-link active" id="nav-dashboard">Dashboard</a></li>
-          <li><a href="/new-decision.html" class="btn btn-primary" id="btn-create-nav">+ New Decision</a></li>
+          <li><a href="/lessons.html" class="nav-link">Lessons</a></li>
+          <li><a href="/calendar.html" class="nav-link">Calendar</a></li>
+          <li><a href="/profile.html" class="nav-link" id="nav-user-profile">Profile</a></li>
+          <li><span id="nav-user-pill" class="nav-user-badge">User</span></li>
+          <li><a href="/new-decision.html" class="btn btn-primary btn-sm" id="btn-create-nav">+ New Decision</a></li>
+          <li><button type="button" class="btn btn-secondary btn-sm" id="btn-nav-logout">Log Out</button></li>
         </ul>
       </nav>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main class="container" style="padding-top: 2.5rem;">
+  <main class="container" style="padding-top: 2rem; padding-bottom: 5rem;">
     
-    <!-- Hero / Header Section -->
-    <section style="margin-bottom: 2rem;">
-      <h1 id="page-heading">Decision Intelligence Dashboard</h1>
-      <p id="page-subheading">Track your choices, eliminate hindsight bias, and calibrate your future judgment.</p>
+    <!-- Top Review Reminders Banner (Populated if decisions need attention) -->
+    <div id="reminder-banner-container" style="display: none;"></div>
+
+    <!-- Page Title & Quick Actions -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 style="font-size: 2.25rem; margin-bottom: 0.35rem;">Decision Dashboard</h1>
+        <p style="color: var(--text-secondary); margin: 0;">Audit your premises, track outcomes, and calibrate your predictive judgment.</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-export-json">Export JSON</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-export-csv">Export CSV</button>
+      </div>
+    </div>
+
+    <!-- KPI Statistics Grid -->
+    <section class="stats-grid" aria-label="Key Performance Metrics">
+      <div class="stat-card">
+        <div class="stat-card-label">Total Decisions</div>
+        <div class="stat-card-value" id="kpi-total">0</div>
+        <div class="stat-card-subtext">Active & documented</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Reviews Due</div>
+        <div class="stat-card-value" style="color: var(--status-due);" id="kpi-due">0</div>
+        <div class="stat-card-subtext">Ready for reality audit</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Pending Reviews</div>
+        <div class="stat-card-value" style="color: var(--status-pending);" id="kpi-pending">0</div>
+        <div class="stat-card-subtext">Maturing hypotheses</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Success Rate</div>
+        <div class="stat-card-value" style="color: var(--outcome-achieved);" id="kpi-success-rate">0%</div>
+        <div class="stat-card-subtext" id="kpi-reviewed-subtext">0 of 0 reviewed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Calibration Gap</div>
+        <div class="stat-card-value" id="kpi-calibration-gap">0%</div>
+        <div class="stat-card-subtext" id="kpi-calibration-subtext">Confidence vs. Reality</div>
+      </div>
     </section>
 
-    <!-- Analytics & Stats Grid -->
-    <section class="stats-grid" id="stats-grid" aria-label="Decision Statistics">
-      <!-- Total Decisions Card -->
-      <div class="stat-card" id="stat-card-total">
-        <div class="stat-label">Total Decisions</div>
-        <div class="stat-value" id="stat-total">--</div>
-        <div class="stat-subtitle" id="stat-total-sub">Total recorded choices</div>
-      </div>
+    <!-- Navigation Tabs: All Decisions / Favorites / Archived -->
+    <div class="nav-tabs">
+      <button type="button" class="nav-tab-btn active" id="tab-all">All Decisions</button>
+      <button type="button" class="nav-tab-btn" id="tab-favorites">⭐ Favorites</button>
+      <button type="button" class="nav-tab-btn" id="tab-archived">📦 Archived</button>
+    </div>
 
-      <!-- Reviews Due Card -->
-      <div class="stat-card" id="stat-card-due">
-        <div class="stat-label">Reviews Due</div>
-        <div class="stat-value" id="stat-due" style="color: var(--status-due-text);">--</div>
-        <div class="stat-subtitle" id="stat-due-sub">Ready for outcome evaluation</div>
-      </div>
-
-      <!-- Pending Reviews Card -->
-      <div class="stat-card" id="stat-card-pending">
-        <div class="stat-label">Pending Reviews</div>
-        <div class="stat-value" id="stat-pending" style="color: var(--status-pending-text);">--</div>
-        <div class="stat-subtitle" id="stat-pending-sub">Awaiting target review dates</div>
-      </div>
-
-      <!-- Success Rate Card -->
-      <div class="stat-card" id="stat-card-rate">
-        <div class="stat-label">Success Rate (Achieved)</div>
-        <div class="stat-value" id="stat-success-rate">--%</div>
-        <div class="stat-subtitle" id="stat-success-sub">Of evaluated decisions</div>
-      </div>
-
-      <!-- Calibration Gap Card -->
-      <div class="stat-card" id="stat-card-calibration">
-        <div class="stat-label">Calibration Gap</div>
-        <div class="stat-value" id="stat-calibration-gap">--</div>
-        <div class="stat-subtitle" id="stat-calibration-sub">Confidence vs reality accuracy</div>
-      </div>
-    </section>
-
-    <!-- Toolbar: Search, Category Filter Pills, Status & Sort -->
-    <section class="toolbar" id="filter-toolbar">
-      <div class="toolbar-row">
-        <!-- Search Box -->
-        <div class="search-box">
+    <!-- Search & Filter Toolbar -->
+    <section class="toolbar-container" aria-label="Filters and Search">
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+        <!-- Live Search -->
+        <div class="search-input-wrapper" style="flex: 2; min-width: 260px;">
           <span class="search-icon">🔍</span>
           <input 
             type="text" 
-            class="search-input" 
             id="search-input" 
-            placeholder="Search decisions by title, reasoning, or keyword..." 
-            autocomplete="off"
+            class="search-input" 
+            placeholder="Search decisions by title, reasoning, expected outcome, tags, or lessons..." 
           />
         </div>
 
-        <!-- Filter Controls Group -->
-        <div class="filter-group">
-          <!-- Status Select -->
-          <select class="select-control" id="status-filter" aria-label="Filter by lifecycle status">
+        <!-- Status Filter Dropdown -->
+        <div style="flex: 1; min-width: 160px;">
+          <select id="status-filter" class="search-input" style="padding-left: 1rem; cursor: pointer;">
             <option value="">All Statuses</option>
-            <option value="Review Due">Review Due</option>
             <option value="Pending Review">Pending Review</option>
+            <option value="Review Due">Review Due</option>
             <option value="Reviewed">Reviewed</option>
           </select>
+        </div>
 
-          <!-- Sort Select -->
-          <select class="select-control" id="sort-filter" aria-label="Sort decisions">
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="confidence_high">Confidence: High to Low</option>
-            <option value="confidence_low">Confidence: Low to High</option>
-            <option value="review_date">Review Date: Earliest</option>
+        <!-- Sort Dropdown -->
+        <div style="flex: 1; min-width: 170px;">
+          <select id="sort-filter" class="search-input" style="padding-left: 1rem; cursor: pointer;">
+            <option value="newest">Sort: Newest First</option>
+            <option value="oldest">Sort: Oldest First</option>
+            <option value="reviewDate">Sort: Target Review Date</option>
+            <option value="confidence-desc">Sort: Highest Confidence</option>
+            <option value="confidence-asc">Sort: Lowest Confidence</option>
+            <option value="recentlyReviewed">Sort: Recently Reviewed</option>
           </select>
         </div>
       </div>
 
       <!-- Category Filter Pills -->
-      <div class="category-pills" id="category-pills">
-        <button type="button" class="pill-btn active" data-category="All">All Categories</button>
-        <button type="button" class="pill-btn" data-category="Technology">Technology</button>
-        <button type="button" class="pill-btn" data-category="Career">Career</button>
-        <button type="button" class="pill-btn" data-category="Finance">Finance</button>
-        <button type="button" class="pill-btn" data-category="Product">Product</button>
-        <button type="button" class="pill-btn" data-category="Life">Life</button>
-        <button type="button" class="pill-btn" data-category="Other">Other</button>
+      <div class="category-pills-scroll" id="category-pills-list">
+        <button type="button" class="category-pill active" data-category="All">All Categories</button>
+        <button type="button" class="category-pill" data-category="Technology">Technology</button>
+        <button type="button" class="category-pill" data-category="Career">Career</button>
+        <button type="button" class="category-pill" data-category="Finance">Finance</button>
+        <button type="button" class="category-pill" data-category="Education">Education</button>
+        <button type="button" class="category-pill" data-category="Projects">Projects</button>
+        <button type="button" class="category-pill" data-category="Personal">Personal</button>
+        <button type="button" class="category-pill" data-category="Health">Health</button>
+        <button type="button" class="category-pill" data-category="Other">Other</button>
       </div>
     </section>
 
-    <!-- Decisions Container -->
-    <section id="decisions-section" aria-label="Decisions List">
-      <!-- Loading Spinner (Shown during fetches) -->
-      <div class="spinner" id="loading-spinner" style="display: none;"></div>
+    <!-- Loading Spinner -->
+    <div class="spinner" id="loading-spinner"></div>
 
-      <!-- Grid of Decision Cards -->
-      <div class="decisions-grid" id="decisions-grid"></div>
+    <!-- Empty State Container -->
+    <div id="empty-state" style="display: none; text-align: center; padding: 4.5rem 1.5rem; background: #ffffff; border: 1px dashed var(--border-subtle); border-radius: var(--radius-lg);">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;" id="empty-state-title">No Decisions Found</h2>
+      <p style="color: var(--text-muted); max-width: 480px; margin: 0 auto 1.75rem;" id="empty-state-description">
+        Document the options you are weighing, your underlying reasoning, and your expected outcome to calibrate your decision making.
+      </p>
+      <a href="/new-decision.html" class="btn btn-primary" id="btn-empty-create">+ Record Your First Decision</a>
+    </div>
 
-      <!-- Empty State (Shown when zero decisions match) -->
-      <div class="empty-state" id="empty-state" style="display: none;">
-        <div class="empty-icon">🏛</div>
-        <h2>No Decisions Found</h2>
-        <p style="margin: 0.75rem 0 1.5rem;">No decisions match your active filters, or you haven't recorded your first decision yet.</p>
-        <a href="/new-decision.html" class="btn btn-primary" id="btn-empty-create">+ Record Your First Decision</a>
-      </div>
-    </section>
+    <!-- Decision Cards Grid -->
+    <section class="decision-grid" id="decision-grid" aria-label="Decisions List" style="display: none;"></section>
 
   </main>
 
-  <!-- Global Toast Notification Container -->
-  <div id="toast-container"></div>
+  <!-- Central Toast Container -->
+  <div id="toast-container" aria-live="polite"></div>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <p>DecisionVault — Your Decisions Have a History. Built with Vanilla Web Standards & MongoDB.</p>
-    </div>
-  </footer>
-
-  <!-- Scripts -->
+  <!-- Client JavaScript Modules -->
   <script src="/js/api.js"></script>
   <script src="/js/dashboard.js"></script>
 </body>

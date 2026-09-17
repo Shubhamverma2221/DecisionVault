@@ -39,15 +39,27 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
-    message: 'DecisionVault API is running',
+    message: 'DecisionVault Multi-User API is running',
     environment: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString()
   });
 });
 
-// Mount decision routes under /api/decisions
+// =========================================
+// Mount API Route Trees
+// =========================================
+
+// Authentication routes (Register, Login, Guest, Google, Me, Convert)
+const authRoutes = require('./routes/authRoutes');
+app.use('/api/auth', authRoutes);
+
+// Decision routes (CRUD, Favorites, Archive, Reviews, Lessons, Calendar, Export)
 const decisionRoutes = require('./routes/decisionRoutes');
 app.use('/api/decisions', decisionRoutes);
+
+// Analytics routes (Overview metrics, Confidence calibration)
+const analyticsRoutes = require('./routes/analyticsRoutes');
+app.use('/api/analytics', analyticsRoutes);
 
 // =========================================
 // Error Handling Middleware
@@ -67,7 +79,7 @@ const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
   console.log(`=========================================`);
-  console.log(` DecisionVault Server Running on port ${PORT}`);
+  console.log(` DecisionVault Multi-User Server Running on port ${PORT}`);
   console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(` Health check: http://localhost:${PORT}/api/health`);
   console.log(`=========================================`);

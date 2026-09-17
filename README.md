@@ -1,13 +1,13 @@
 # DecisionVault — Your Decisions Have a History
 
-> **A Cognitive Decision Tracking & Empirical Calibration Platform**  
+> **A Multi-User Cognitive Decision Tracking & Empirical Calibration Platform**  
 > Confront past hypotheses with present reality. Neutralize hindsight bias. Calibrate subjective confidence against objective results.
 
 [![Node.js](https://img.shields.io/badge/Node.js-v18+-68a063.svg)](https://nodejs.org)
 [![Express](https://img.shields.io/badge/Express-v4.19-lightgrey.svg)](https://expressjs.com)
 [![MongoDB](https://img.shields.io/badge/MongoDB-v6.0+-green.svg)](https://www.mongodb.com)
-[![Vanilla Frontend](https://img.shields.io/badge/Frontend-HTML5%20%7C%20CSS3%20%7C%20ES6+-blue.svg)](#frontend-architecture)
-[![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
+[![Theme](https://img.shields.io/badge/Theme-Light%20Mode%20Only-f8fafc.svg)](#light-mode-design-system)
+[![Auth](https://img.shields.io/badge/Auth-JWT%20%7C%20Google%20%7C%20Guest-6366f1.svg)](#multi-user-authentication)
 
 ---
 
@@ -23,174 +23,85 @@ By enforcing a **two-milestone chronological model**, DecisionVault permanently 
  Milestone 1: Genesis                       Milestone 2: Reality
 ┌─────────────────────────────────┐        ┌──────────────────────────────────┐
 │ • Alternatives Considered (≥2)  │        │ • Concrete Empirical Reality     │
-│ • Selected Option               │ ─────> │ • Evaluation (Achieved / Failed) │
-│ • Core Reasoning & Hypothesis   │ (Time) │ • Lessons Learned & Bias Audit   │
-│ • Concrete Expected Outcome     │        │ • Permanent Historical Lock 🔒   │
-│ • Confidence Score (0–100%)     │        └──────────────────────────────────┘
-└─────────────────────────────────┘
+│ • Weighted Criteria Matrix      │        │ • Outcome (Achieved / Failed)    │
+│ • Core Reasoning & Hypothesis   │ ─────> │ • Quantitative Score (1–10)      │
+│ • Concrete Expected Outcome     │ (Time) │ • Lessons Learned & Bias Audit   │
+│ • Confidence Score (0–100%)     │        │ • Permanent Historical Lock 🔒   │
+└─────────────────────────────────┘        └──────────────────────────────────┘
 ```
 
 ---
 
-## Core Features
+## Key Features
 
-### 1. Decision Genesis Recording
-- **Multi-Option Weighing:** Enforces listing at least two distinct alternatives before committing.
-- **Hypothesis Formulation:** Documents the explicit reasoning and quantitative expected outcome.
-- **Subjective Confidence Slider:** Locks in your certainty score ($0–100\%$) at the moment of choice.
+### 1. Multi-User Authentication Suite
+- **Email + Password Registration:** Full registration with bcrypt salt & hash encryption.
+- **JWT Authorization:** Stateless Bearer tokens with strict user isolation across all records.
+- **Guest Mode:** Instant one-click demo login with full CRUD privileges.
+- **In-Place Guest Migration:** Upgrade a guest session to a permanent account at any time without losing any decisions.
+- **Google Sign-In Ready:** Modular OAuth/Google Identity client integration.
 
-### 2. Dynamic Temporal Lifecycle
-- Calculates status on the fly without brittle cron jobs:
-  - `Pending Review`: Target review date is in the future.
-  - `Review Due`: Target review date has arrived or passed.
-  - `Reviewed`: Retrospective evaluation has been recorded and permanently locked.
+### 2. Decision Genesis & Weighted Matrix
+- **Multi-Option Weighing:** Compare at least 2 distinct alternatives before committing.
+- **Weighted Criteria Scoring:** Define evaluation criteria (e.g. Speed, Cost, Scalability) with custom weights ($\sum \text{weight} = 100\%$) and calculate composite scores for each option.
+- **Subjective Confidence Slider:** Record your calibrated certainty (0–100%) prior to the outcome.
+- **Tags & Categorization:** Organize by Technology, Career, Finance, Product, Life, and Health.
 
 ### 3. Retrospective Review & Empirical Confrontation
-- When review day arrives, view the exact original hypothesis side-by-side with reality.
-- Evaluate outcome as `Achieved`, `Partially Achieved`, or `Not Achieved`.
-- Document lessons learned to calibrate future heuristics.
+- **Due Date Reminders:** Automated banner alerts for decisions awaiting evaluation.
+- **Empirical Reality Confrontation:** Review what actually happened side-by-side with your initial expectations.
+- **Outcome Assessment:** Categorize results as `Achieved`, `Partially Achieved`, or `Not Achieved` with a 1–10 quantitative score.
+- **Lessons Learned:** Capture timeless takeaways to calibrate future decisions.
 
-### 4. The Historical Immutability Invariant
-- Once a review is recorded, the decision becomes **permanently immutable**.
-- Updates (`PUT /api/decisions/:id`) and duplicate reviews (`POST /api/decisions/:id/review`) are rejected with `400 Bad Request`.
-- Guarantees historical integrity against retroactive rewriting.
+### 4. Decision Replay Mode
+- Step through your decision like a flight recorder:
+  1. **What You Believed:** Initial options, chosen alternative, confidence, and reasoning.
+  2. **What Actually Happened:** Retrospective review and reality comparison.
+  3. **Prediction vs. Reality:** Outcome status, accuracy differential, and score.
+  4. **The Lesson Learned:** The lasting principle for your personal playbook.
 
-### 5. Dual-Milestone Visual History Timeline
-- Flagship timeline view powered by pure CSS linear gradients and pseudo-elements.
-- Renders the full evolutionary trajectory from intent to reality.
+### 5. Lessons Library & Decision Calendar
+- **Lessons Library (`lessons.html`):** A centralized knowledge base of all your historical lessons, filterable by category and searchable.
+- **Decision Calendar (`calendar.html`):** Interactive monthly calendar view highlighting decision genesis dates, review due dates, and completed reviews.
+- **Data Portability:** 1-click export of all decisions to **JSON** or **CSV** formats.
 
-### 6. High-Performance Calibration Metrics
-- Single-pass MongoDB `$facet` aggregation pipeline.
-- Calculates success rates across domains and computes the mathematical **Calibration Gap**:
-  $$\text{Calibration Gap} = \overline{\text{Confidence}} - \text{Success Rate}$$
-  - **Positive Gap:** Warns of overconfidence.
-  - **Negative Gap:** Indicates risk aversion / underconfidence.
-
-### 7. Interactive Dashboard
-- 5 real-time KPI cards.
-- Debounced live search across titles, reasoning, and outcomes.
-- Category filter pills (`Technology`, `Career`, `Finance`, `Product`, `Health`, `Personal`, `General`).
-- Multi-parameter sorting (by review date, newest, confidence).
-
----
-
-## System Architecture
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        Vanilla Client (Browser)                        │
-│  index.html  │  new-decision.html  │  decision.html  │  review.html   │
-│  ──────────  │  ────────────────── │  ────────────── │  ───────────   │
-│  Dashboard   │  Genesis Form       │  Visual Timeline│  Review Lock   │
-│                                                                        │
-│  JavaScript: api.js (Fetch API Bridge) ◄──► Toast & DOM Controllers    │
-│  CSS3: variables.css │ base.css │ components.css (:has() & Grid)       │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │ HTTP / JSON REST
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                         Node.js / Express Server                       │
-│  server.js (Middleware, CORS, Static Files, Health Check)              │
-│  routes/decisionRoutes.js (REST Dispatcher)                            │
-│  controllers/decisionController.js (CRUD, Aggregation & Immutability) │
-│  middleware/errorHandler.js (Centralized Error Normalization)          │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │ Mongoose ODM / Connection Pool
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                             MongoDB Atlas / Local                      │
-│  Database: decisionvault                                               │
-│  Collection: decisions                                                 │
-│  Indexes: { reviewDate: 1 }, { createdAt: -1 }, { category: 1 }        │
-│  Embedded Subdocument: reviewSchema { actualOutcome, result, ... }     │
-└────────────────────────────────────────────────────────────────────────┘
-```
+### 6. Light Mode Only Design System
+- Built strictly with a clean, modern **Light Mode aesthetic**:
+  - Background Canvas: Crisp soft slate (`#f8fafc`)
+  - Elevated Cards: Pure white (`#ffffff`) with subtle hairline borders (`#e2e8f0`)
+  - Typography: Deep charcoal slate (`#0f172a` and `#334155`)
+  - Accent Palette: Indigo (`#4f46e5`), Emerald (`#059669`), Amber (`#d97706`), and Rose (`#e11d48`)
+  - Zero dark mode styles or toggles.
 
 ---
 
-## Technology Stack
+## Tech Stack
 
-- **Backend:** Node.js (v18+), Express.js (v4.19), Mongoose ODM (v8.3), `dotenv`, `cors`.
-- **Database:** MongoDB (Local or Atlas) with embedded subdocuments and `$facet` aggregation.
-- **Frontend:** Semantic HTML5, Vanilla CSS3 (Custom Properties, Flexbox, CSS Grid, `:has()` relational selectors), Vanilla ES6+ JavaScript (Fetch API, DOM manipulation, no build steps or frameworks).
+* **Backend:** Node.js, Express 4, Mongoose 8, MongoDB, `bcryptjs`, `jsonwebtoken`
+* **Frontend:** Vanilla ES6+ JavaScript, CSS3 Design Tokens, Semantic HTML5
+* **Security:** Strict per-user database scoping (`userId: req.user._id`), JWT auth middleware, sanitized inputs, and input validation.
 
 ---
 
-## Quickstart & Local Setup
+## Quickstart
 
-### 1. Prerequisites
-- **Node.js** (v18.0.0 or higher) installed.
-- **MongoDB** running locally on port `27017` or a **MongoDB Atlas** connection URI.
+### Prerequisites
+- Node.js (v18+)
+- MongoDB running locally at `mongodb://127.0.0.1:27017`
 
-### 2. Clone Repository & Install Dependencies
+### Setup & Run
 ```bash
-git clone https://github.com/yourusername/DecisionVault.git
+# Clone or navigate to the directory
 cd DecisionVault
+
+# Install dependencies
 npm install
-```
 
-### 3. Configure Environment Variables
-Copy the environment template:
-```bash
+# Configure environment (defaults work out of the box)
 cp .env.example .env
-```
-Edit `.env` to match your local setup:
-```ini
-PORT=5000
-NODE_ENV=development
-MONGODB_URI=mongodb://127.0.0.1:27017/decisionvault
-```
 
-### 4. Launch Development Server
-```bash
+# Start development server
 npm run dev
 ```
-Output:
-```
-=========================================
- DecisionVault Server Running on port 5000
- Environment: development
- Health check: http://localhost:5000/api/health
-=========================================
- MongoDB Connected Successfully!
- Host: 127.0.0.1
- Database: decisionvault
- Port: 27017
-=========================================
-```
 
-### 5. Access the Application
-Open your browser and visit:
-- **Dashboard:** [http://localhost:5000](http://localhost:5000)
-- **Record Decision:** [http://localhost:5000/new-decision.html](http://localhost:5000/new-decision.html)
-- **API Health Check:** [http://localhost:5000/api/health](http://localhost:5000/api/health)
-
----
-
-## REST API Overview
-
-| Method | Endpoint | Description | Status Code |
-|---|---|---|---|
-| `GET` | `/api/health` | Service health and uptime check | `200 OK` |
-| `GET` | `/api/decisions/stats` | Aggregated metrics and calibration gap | `200 OK` |
-| `GET` | `/api/decisions` | Filter, search, and sort decisions | `200 OK` |
-| `POST` | `/api/decisions` | Record a new decision (Genesis) | `201 Created` |
-| `GET` | `/api/decisions/:id` | Fetch single decision details and timeline | `200 OK` |
-| `PUT` | `/api/decisions/:id` | Update unreviewed decision (Protected) | `200 OK` / `400 Bad Request` |
-| `DELETE` | `/api/decisions/:id` | Delete a decision record | `200 OK` |
-| `POST` | `/api/decisions/:id/review` | Submit review & lock decision permanently | `200 OK` / `400 Bad Request` |
-
-For the complete API specification with request payloads, query parameters, and response schemas, see [API_DOCUMENTATION.md](API_DOCUMENTATION.md).
-
----
-
-## Project Documentation Index
-
-- [FILE_GUIDE.md](FILE_GUIDE.md) — Comprehensive file-by-file audit, responsibilities, imports, exports, and architectural layers.
-- [PROJECT_NOTES.md](PROJECT_NOTES.md) — Engineering notes, Architectural Decision Records (ADRs), cognitive psychology foundations, and indexing strategies.
-- [API_DOCUMENTATION.md](API_DOCUMENTATION.md) — Full REST API documentation.
-
----
-
-## License
-Distributed under the MIT License. See `LICENSE` for more information.
+Visit **`http://localhost:5000`** in your browser.

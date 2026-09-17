@@ -1,44 +1,44 @@
 const express = require('express');
 const router = express.Router();
-
 const {
   createDecision,
   getDecisions,
   getDecisionById,
   updateDecision,
   deleteDecision,
+  toggleFavorite,
+  toggleArchive,
   reviewDecision,
-  getDecisionStats
+  getLessons,
+  getCalendarEvents,
+  exportDecisions
 } = require('../controllers/decisionController');
+const { protect } = require('../middleware/authMiddleware');
 
-// =========================================
-// Decision Routes Mapping
-// =========================================
+// Enforce authentication on all decision routes
+router.use(protect);
 
-// Root collection routes: /api/decisions
+// Specific static sub-resource endpoints (must precede parameterized /:id)
+router.get('/lessons', getLessons);
+router.get('/calendar', getCalendarEvents);
+router.get('/export', exportDecisions);
+
+// Primary collection routes
 router
   .route('/')
   .get(getDecisions)
   .post(createDecision);
 
-// Aggregate Statistics Route: /api/decisions/stats
-// CRITICAL ORDERING RULE:
-// This specific route MUST be defined BEFORE the parameter route '/:id'.
-// Otherwise, Express will capture '/stats' as req.params.id and fail with a CastError!
-router
-  .route('/stats')
-  .get(getDecisionStats);
+// Specific document actions
+router.post('/:id/review', reviewDecision);
+router.patch('/:id/favorite', toggleFavorite);
+router.patch('/:id/archive', toggleArchive);
 
-// Individual resource routes: /api/decisions/:id
+// Primary document CRUD routes
 router
   .route('/:id')
   .get(getDecisionById)
   .put(updateDecision)
   .delete(deleteDecision);
-
-// Specialized review endpoint: /api/decisions/:id/review
-router
-  .route('/:id/review')
-  .post(reviewDecision);
 
 module.exports = router;

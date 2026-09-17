@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="View decision details, original premises, confidence calibration, and retrospective timeline history.">
-  <title>Decision History — DecisionVault</title>
+  <meta name="description" content="View decision details, cognitive history timeline, weighted criteria scores, and decision replay.">
+  <title>Decision Details — DecisionVault</title>
 
-  <!-- Google Fonts: Outfit & Inter -->
+  <!-- Google Fonts: Outfit, Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- Core Stylesheets -->
+  <!-- Core Stylesheets (Light Mode Only) -->
   <link rel="stylesheet" href="/css/variables.css">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/components.css">
@@ -21,112 +21,139 @@
   <!-- Navigation Bar -->
   <header class="navbar">
     <div class="container navbar-inner">
-      <a href="/" class="brand-logo" id="brand-link">
+      <a href="/" class="brand-logo">
         <div class="brand-icon">DV</div>
         <span>DecisionVault</span>
       </a>
       <nav>
         <ul class="nav-links">
-          <li><a href="/" class="nav-link" id="nav-dashboard">Dashboard</a></li>
-          <li><a href="/new-decision.html" class="btn btn-primary" id="btn-create-nav">+ New Decision</a></li>
+          <li><a href="/" class="nav-link">Dashboard</a></li>
+          <li><a href="/lessons.html" class="nav-link">Lessons</a></li>
+          <li><a href="/calendar.html" class="nav-link">Calendar</a></li>
+          <li><a href="/profile.html" class="nav-link">Profile</a></li>
+          <li><a href="/new-decision.html" class="btn btn-primary btn-sm">+ New Decision</a></li>
+          <li><button type="button" class="btn btn-secondary btn-sm" id="btn-nav-logout">Log Out</button></li>
         </ul>
       </nav>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main class="container" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+  <main class="container" style="padding-top: 2rem; padding-bottom: 5rem;">
     
-    <!-- Top Breadcrumb Navigation & Action Bar -->
+    <!-- Top Action & Navigation Bar -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-      <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">← Back to Dashboard</a>
+      <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">← Back to Dashboard</a>
       
-      <!-- Action Buttons Container -->
-      <div id="decision-actions" style="display: flex; gap: 0.75rem; align-items: center;">
-        <button type="button" class="btn btn-danger" id="btn-delete-decision" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
-          Delete Decision
-        </button>
+      <div id="decision-actions" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-favorite">☆ Favorite</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-archive">📦 Archive</button>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-trigger-replay">🔄 Decision Replay</button>
+        <button type="button" class="btn btn-danger btn-sm" id="btn-delete-decision">Delete</button>
       </div>
     </div>
 
-    <!-- Loading Spinner -->
+    <!-- Spinner -->
     <div class="spinner" id="loading-spinner"></div>
 
-    <!-- Decision Details Content View (Populated by decision.js) -->
+    <!-- Decision Content View -->
     <div id="decision-content" style="display: none;">
       
       <!-- Hero Header -->
-      <section style="margin-bottom: 3rem; text-align: center;">
-        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-          <span class="badge badge-pending" id="badge-status">Status</span>
-          <span id="badge-outcome-container"></span>
+      <section style="text-align: center; margin-bottom: 3rem; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2.5rem 1.5rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+          <span class="badge" id="badge-status">Status</span>
+          <span class="badge badge-category" id="badge-category">Category</span>
+          <span class="badge" id="badge-confidence" style="background: var(--accent-light); color: var(--accent-primary);">--% Confidence</span>
         </div>
-        <h1 id="decision-title" style="font-size: 2.5rem; max-width: 850px; margin: 0 auto 1rem;">--</h1>
-        <p id="decision-description" style="max-width: 700px; margin: 0 auto; font-size: 1.05rem;"></p>
+        <h1 id="decision-title" style="font-size: 2.25rem; max-width: 850px; margin: 0 auto 0.75rem;">--</h1>
+        <p id="decision-description" style="max-width: 700px; margin: 0 auto 1rem; color: var(--text-secondary);"></p>
+        <div id="decision-tags" style="display: flex; justify-content: center; gap: 0.35rem; flex-wrap: wrap;"></div>
       </section>
 
-      <!-- Visual History Timeline Section (Feature 5) -->
-      <section class="timeline" id="timeline-container" aria-label="Decision Life Cycle Timeline">
+      <!-- Visual History Timeline -->
+      <section class="timeline" id="timeline-container" aria-label="Decision Timeline">
         
         <!-- Milestone 1: Genesis Node -->
         <div class="timeline-node" id="node-genesis">
           <div class="timeline-marker"></div>
           <div class="timeline-card">
-            <div class="timeline-card-header">
-              <span style="font-weight: 700; color: var(--accent-primary);">1. Decision Genesis</span>
-              <span class="timeline-date" id="genesis-date">Recorded: --</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+              <span style="font-weight: 700; color: var(--accent-primary); font-size: 1.1rem;">1. Decision Genesis</span>
+              <span id="genesis-date" style="font-size: 0.85rem; color: var(--text-muted);">Recorded: --</span>
             </div>
 
-            <div class="timeline-section-title">Options Considered & Selection</div>
-            <ul class="options-list" id="genesis-options">
-              <!-- Rendered options -->
-            </ul>
-
-            <div class="timeline-section-title">Core Reasoning</div>
-            <p class="timeline-content" id="genesis-reasoning">--</p>
-
-            <div class="confidence-meter" style="margin-top: 1.5rem;">
-              <div class="meter-header">
-                <span>Confidence Calibration</span>
-                <span id="genesis-confidence" style="font-weight: 700; color: var(--accent-primary);">--%</span>
-              </div>
-              <div class="meter-bar">
-                <div class="meter-fill" id="genesis-confidence-fill" style="width: 0%;"></div>
-              </div>
+            <!-- Options Considered & Selected Option -->
+            <div style="margin-bottom: 1.25rem;">
+              <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Alternatives Considered</div>
+              <ul id="genesis-options" style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;"></ul>
             </div>
 
-            <div class="timeline-section-title">Expected Outcome (The Hypothesis)</div>
-            <div style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-md); border-left: 3px solid var(--accent-primary); margin-top: 0.5rem;">
-              <p class="timeline-content" id="genesis-expected" style="font-weight: 500; color: var(--text-primary);">--</p>
+            <!-- Criteria Scoring Table (if present) -->
+            <div id="genesis-criteria-box" style="display: none; margin-bottom: 1.25rem;">
+              <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Criteria & Weighted Scores</div>
+              <div id="genesis-criteria-table-container" style="overflow-x: auto;"></div>
+            </div>
+
+            <!-- Core Reasoning -->
+            <div style="margin-bottom: 1.25rem;">
+              <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem;">Core Reasoning & Hypothesis</div>
+              <p id="genesis-reasoning" style="background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.875rem; margin: 0; line-height: 1.5;"></p>
+            </div>
+
+            <!-- Concrete Expected Outcome -->
+            <div>
+              <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem;">Expected Outcome</div>
+              <p id="genesis-expected-outcome" style="background: #eef2ff; border-left: 3px solid var(--accent-primary); padding: 0.875rem; margin: 0; line-height: 1.5; color: #1e1b4b; border-radius: 0 var(--radius-md) var(--radius-md) 0;"></p>
             </div>
           </div>
         </div>
 
-        <!-- Milestone 2: Retrospective Reflection Node -->
-        <div class="timeline-node" id="node-review">
+        <!-- Milestone 2: Reality Node -->
+        <div class="timeline-node" id="node-reality">
           <div class="timeline-marker"></div>
-          <div class="timeline-card" id="review-card-content">
-            <!-- Dynamically populated: either reviewed reflection or pending review call-to-action -->
+          <div class="timeline-card" id="reality-card">
+            <!-- Dynamically injected: Review details or "Conduct Review" action card -->
           </div>
         </div>
 
+      </section>
+
+      <!-- Audit & Revision History -->
+      <section style="max-width: 850px; margin: 3rem auto 0; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm);">
+        <h3 style="font-size: 1.2rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>📜</span>
+          <span>Audit & Revision Ledger</span>
+        </h3>
+        <ul id="audit-history-list" style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem;"></ul>
       </section>
 
     </div>
 
   </main>
 
-  <!-- Global Toast Notification Container -->
+  <!-- Decision Replay Modal Dialog -->
+  <div id="replay-modal" class="replay-modal" style="display: none;">
+    <div class="replay-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+        <div>
+          <span class="replay-step-header" id="replay-step-indicator">Step 1 of 4</span>
+          <h2 id="replay-step-title" style="font-size: 1.35rem; margin: 0;">What You Thought</h2>
+        </div>
+        <button type="button" class="btn-remove-option" id="btn-close-replay" title="Close Replay">✕</button>
+      </div>
+
+      <div id="replay-step-content" style="min-height: 160px; margin-bottom: 1.75rem;"></div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-replay-prev" disabled>← Previous</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btn-replay-next">Next Step →</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast-container"></div>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <p>DecisionVault — Your Decisions Have a History. Built with Vanilla Web Standards & MongoDB.</p>
-    </div>
-  </footer>
-
-  <!-- Scripts -->
   <script src="/js/api.js"></script>
   <script src="/js/decision.js"></script>
 </body>

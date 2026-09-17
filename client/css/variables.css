@@ -1,74 +1,85 @@
-/* ==========================================================================
-   DecisionVault Design Tokens & CSS Custom Properties
-   ========================================================================== */
+/**
+ * ==========================================================================
+ * DecisionVault Design System — LIGHT MODE ONLY
+ * ==========================================================================
+ * Crisp, modern, high-contrast light theme tokens.
+ * Zero dark mode, no theme toggles, optimized for professional clarity.
+ */
 
 :root {
-  /* Primary Color Palette (Deep Obsidian / Midnight Slate) */
-  --bg-primary: #0a0e17;
-  --bg-secondary: #111827;
-  --bg-card: rgba(17, 24, 39, 0.85);
-  --bg-card-hover: rgba(24, 33, 53, 0.95);
-  --bg-glass: rgba(255, 255, 255, 0.04);
-  --bg-input: #1e293b;
+  /* Surface & Background Colors (Pure Light Mode) */
+  --bg-primary: #f8fafc;        /* Slate-50: Main application canvas */
+  --bg-card: #ffffff;           /* Crisp White: Elevated card surfaces */
+  --bg-card-hover: #ffffff;
+  --bg-input: #ffffff;          /* Pure White: Input fields */
+  --bg-muted: #f1f5f9;          /* Slate-100: Subtle backgrounds & badges */
+  --bg-navbar: rgba(255, 255, 255, 0.95);
 
-  /* Borders & Dividers */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-card: rgba(255, 255, 255, 0.12);
-  --border-focus: #6366f1;
+  /* Typography & Content Colors */
+  --text-primary: #0f172a;      /* Slate-900: High-contrast primary headings & text */
+  --text-secondary: #334155;    /* Slate-700: Body paragraphs & labels */
+  --text-muted: #64748b;        /* Slate-500: Helper text, hints & dates */
+  --text-inverse: #ffffff;      /* White text for filled buttons & dark badges */
 
-  /* Text Hierarchy */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-inverse: #0f172a;
+  /* Border & Divider Tokens */
+  --border-subtle: #e2e8f0;     /* Slate-200: Hairline borders */
+  --border-card: #e2e8f0;       /* Slate-200: Card borders */
+  --border-input: #cbd5e1;      /* Slate-300: High-visibility form field borders */
+  --border-focus: #4f46e5;      /* Indigo-600: Active focus ring */
 
-  /* Brand Accents (Indigo / Violet Gradient) */
-  --accent-primary: #6366f1;
-  --accent-primary-hover: #4f46e5;
-  --accent-secondary: #8b5cf6;
-  --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
-  --accent-glow: rgba(99, 102, 241, 0.35);
+  /* Brand Accents */
+  --accent-primary: #4f46e5;     /* Indigo-600: Primary actions & links */
+  --accent-hover: #4338ca;       /* Indigo-700: Interactive hover state */
+  --accent-light: #eef2ff;       /* Indigo-50: Subtle active tint */
+  --accent-secondary: #0284c7;   /* Sky-600: Secondary accent */
 
-  /* Lifecycle Status Badges */
-  --status-pending-bg: rgba(59, 130, 246, 0.15);
-  --status-pending-text: #60a5fa;
-  --status-pending-border: rgba(59, 130, 246, 0.3);
+  /* Cognitive Outcome Semantic Colors */
+  --outcome-achieved: #16a34a;       /* Emerald-600 */
+  --outcome-achieved-bg: #f0fdf4;    /* Emerald-50 */
+  --outcome-achieved-border: #bbf7d0;/* Emerald-200 */
 
-  --status-due-bg: rgba(245, 158, 11, 0.15);
-  --status-due-text: #fbbf24;
-  --status-due-border: rgba(245, 158, 11, 0.3);
+  --outcome-partial: #d97706;        /* Amber-600 */
+  --outcome-partial-bg: #fffbeb;     /* Amber-50 */
+  --outcome-partial-border: #fde68a; /* Amber-200 */
 
-  --status-reviewed-bg: rgba(16, 185, 129, 0.15);
-  --status-reviewed-text: #34d399;
-  --status-reviewed-border: rgba(16, 185, 129, 0.3);
+  --outcome-failed: #dc2626;         /* Red-600 */
+  --outcome-failed-bg: #fef2f2;      /* Red-50 */
+  --outcome-failed-border: #fecaca;  /* Red-200 */
 
-  /* Retrospective Evaluation Outcomes */
-  --outcome-achieved: #10b981;
-  --outcome-achieved-bg: rgba(16, 185, 129, 0.12);
-  --outcome-partial: #f59e0b;
-  --outcome-partial-bg: rgba(245, 158, 11, 0.12);
-  --outcome-failed: #ef4444;
-  --outcome-failed-bg: rgba(239, 68, 68, 0.12);
+  /* Lifecycle Status Colors */
+  --status-pending: #2563eb;         /* Blue-600 */
+  --status-pending-bg: #eff6ff;      /* Blue-50 */
+  --status-pending-border: #bfdbfe;  /* Blue-200 */
 
-  /* Elevation & Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 25px var(--accent-glow);
+  --status-due: #ea580c;             /* Orange-600 */
+  --status-due-bg: #fff7ed;          /* Orange-50 */
+  --status-due-border: #fed7aa;      /* Orange-200 */
+
+  --status-reviewed: #16a34a;        /* Green-600 */
+  --status-reviewed-bg: #f0fdf4;
+  --status-reviewed-border: #bbf7d0;
+
+  --status-archived: #64748b;        /* Slate-500 */
+  --status-archived-bg: #f1f5f9;
+  --status-archived-border: #cbd5e1;
+
+  /* Elevation Shadows (Soft, Crisp, Professional) */
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
 
   /* Border Radii */
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-full: 9999px;
 
-  /* Typography Tokens */
-  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  /* Typography Scale */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: 'Outfit', var(--font-sans);
+  --font-mono: 'JetBrains Mono', monospace;
 
-  /* Transitions */
+  /* Motion & Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
 }

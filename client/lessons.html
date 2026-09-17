@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse and search lessons learned from your reviewed decisions in DecisionVault.">
+  <title>Lessons Library — DecisionVault</title>
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets (Light Mode Only) -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="/" class="brand-logo">
+        <div class="brand-icon">DV</div>
+        <span>DecisionVault</span>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link">Dashboard</a></li>
+          <li><a href="/lessons.html" class="nav-link active">Lessons</a></li>
+          <li><a href="/calendar.html" class="nav-link">Calendar</a></li>
+          <li><a href="/profile.html" class="nav-link">Profile</a></li>
+          <li><a href="/new-decision.html" class="btn btn-primary btn-sm">+ New Decision</a></li>
+          <li><button type="button" class="btn btn-secondary btn-sm" id="btn-nav-logout">Log Out</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+    
+    <!-- Hero Header -->
+    <section style="margin-bottom: 2rem;">
+      <h1 style="font-size: 2.25rem; margin-bottom: 0.5rem;">Lessons Library</h1>
+      <p style="color: var(--text-secondary); max-width: 650px;">
+        Cognitive heuristics, reflections, and principles extracted from your past decisions to calibrate your future choices.
+      </p>
+    </section>
+
+    <!-- Toolbar: Search & Category Filter -->
+    <div class="toolbar-container">
+      <div class="search-input-wrapper" style="margin-bottom: 1rem;">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          id="search-lessons-input" 
+          class="search-input" 
+          placeholder="Search lessons by principle, keyword, or decision..." 
+        />
+      </div>
+
+      <div class="category-pills-scroll" id="category-pills">
+        <button type="button" class="category-pill active" data-category="All">All Categories</button>
+        <button type="button" class="category-pill" data-category="Technology">Technology</button>
+        <button type="button" class="category-pill" data-category="Career">Career</button>
+        <button type="button" class="category-pill" data-category="Finance">Finance</button>
+        <button type="button" class="category-pill" data-category="Education">Education</button>
+        <button type="button" class="category-pill" data-category="Projects">Projects</button>
+        <button type="button" class="category-pill" data-category="Personal">Personal</button>
+        <button type="button" class="category-pill" data-category="Health">Health</button>
+        <button type="button" class="category-pill" data-category="Other">Other</button>
+      </div>
+    </div>
+
+    <!-- Spinner -->
+    <div class="spinner" id="loading-spinner"></div>
+
+    <!-- Empty State -->
+    <div id="empty-state" style="display: none; text-align: center; padding: 4rem 1.5rem; background: #ffffff; border: 1px dashed var(--border-subtle); border-radius: var(--radius-lg); margin-top: 2rem;">
+      <div style="font-size: 2.5rem; margin-bottom: 1rem;">📖</div>
+      <h2 style="font-size: 1.35rem; margin-bottom: 0.5rem;">No Lessons Recorded Yet</h2>
+      <p style="color: var(--text-muted); max-width: 450px; margin: 0 auto 1.5rem;">
+        Complete a retrospective review on your decisions to document lessons learned and grow your personal heuristics library.
+      </p>
+      <a href="/" class="btn btn-primary">Go to Dashboard</a>
+    </div>
+
+    <!-- Lessons Cards Grid -->
+    <div class="lessons-grid" id="lessons-grid" style="display: none;"></div>
+
+  </main>
+
+  <div id="toast-container"></div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/lessons.js"></script>
+</body>
+</html>

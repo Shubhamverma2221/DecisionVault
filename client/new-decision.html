@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Record an important decision, evaluate alternative options, specify your reasoning, and lock in your expected outcome with DecisionVault.">
+  <meta name="description" content="Record a new decision with weighted criteria scoring, options evaluation, and confidence tracking.">
   <title>New Decision — DecisionVault</title>
 
   <!-- Google Fonts: Outfit & Inter -->
@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- Core Stylesheets -->
+  <!-- Core Stylesheets (Light Mode Only) -->
   <link rel="stylesheet" href="/css/variables.css">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/components.css">
@@ -21,34 +21,40 @@
   <!-- Navigation Bar -->
   <header class="navbar">
     <div class="container navbar-inner">
-      <a href="/" class="brand-logo" id="brand-link">
+      <a href="/" class="brand-logo">
         <div class="brand-icon">DV</div>
         <span>DecisionVault</span>
       </a>
       <nav>
         <ul class="nav-links">
-          <li><a href="/" class="nav-link" id="nav-dashboard">Dashboard</a></li>
-          <li><a href="/new-decision.html" class="btn btn-primary" id="btn-create-nav">+ New Decision</a></li>
+          <li><a href="/" class="nav-link">Dashboard</a></li>
+          <li><a href="/lessons.html" class="nav-link">Lessons</a></li>
+          <li><a href="/calendar.html" class="nav-link">Calendar</a></li>
+          <li><a href="/profile.html" class="nav-link">Profile</a></li>
+          <li><a href="/new-decision.html" class="btn btn-primary btn-sm active">+ New Decision</a></li>
+          <li><button type="button" class="btn btn-secondary btn-sm" id="btn-nav-logout">Log Out</button></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+  <!-- Main Content Container -->
+  <main class="container" style="padding-top: 2.5rem; padding-bottom: 5rem;">
     
-    <!-- Page Title -->
+    <!-- Page Header -->
     <div style="text-align: center; margin-bottom: 2.5rem;">
-      <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; display: inline-block; margin-bottom: 0.75rem;">← Back to Dashboard</a>
-      <h1 id="create-heading">Record a New Decision</h1>
-      <p id="create-subheading" style="max-width: 600px; margin: 0 auto;">Document the options you weighed, the reasoning behind your choice, and the exact outcome you expect to see.</p>
+      <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; display: inline-block; margin-bottom: 0.5rem;">← Back to Dashboard</a>
+      <h1 style="font-size: 2.25rem;">Record a New Decision</h1>
+      <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+        Document the competing options you weighed, the reasoning behind your choice, and the exact outcome you expect to see.
+      </p>
     </div>
 
-    <!-- Creation Form Card -->
+    <!-- Form Card -->
     <section class="form-card" aria-label="Create Decision Form">
       <form id="decision-form" novalidate>
         
-        <!-- Title Input -->
+        <!-- Decision Title -->
         <div class="form-group">
           <label for="title" class="form-label">Decision Title <span style="color: var(--outcome-failed);">*</span></label>
           <input 
@@ -56,24 +62,37 @@
             id="title" 
             name="title" 
             class="form-control" 
-            placeholder="e.g. Should we migrate our database to MongoDB?" 
+            placeholder="e.g. Migrate session storage to Redis cluster" 
             maxlength="150" 
             required 
           />
           <div class="form-hint">Frame your decision clearly as an actionable choice or question.</div>
         </div>
 
+        <!-- Description -->
+        <div class="form-group">
+          <label for="description" class="form-label">Context & Description (Optional)</label>
+          <textarea 
+            id="description" 
+            name="description" 
+            class="form-control" 
+            rows="2" 
+            placeholder="Provide background context, project scope, or business drivers..."
+          ></textarea>
+        </div>
+
         <!-- Category & Target Review Date Grid -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;" class="form-group">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;" class="form-group">
           <!-- Category -->
           <div>
-            <label for="category" class="form-label">Domain Category <span style="color: var(--outcome-failed);">*</span></label>
+            <label for="category" class="form-label">Category <span style="color: var(--outcome-failed);">*</span></label>
             <select id="category" name="category" class="form-control" required>
               <option value="Technology">Technology</option>
               <option value="Career">Career</option>
               <option value="Finance">Finance</option>
-              <option value="Product">Product</option>
-              <option value="Life">Life</option>
+              <option value="Education">Education</option>
+              <option value="Projects">Projects</option>
+              <option value="Personal">Personal</option>
               <option value="Health">Health</option>
               <option value="Other">Other</option>
             </select>
@@ -89,87 +108,8 @@
               class="form-control" 
               required 
             />
-            <div class="form-hint">When will you know whether this decision succeeded?</div>
+            <div class="form-hint">When will the outcome be measurable? (Defaults to 30 days).</div>
           </div>
-        </div>
-
-        <!-- Description Context -->
-        <div class="form-group">
-          <label for="description" class="form-label">Background & Context (Optional)</label>
-          <textarea 
-            id="description" 
-            name="description" 
-            class="form-control" 
-            placeholder="Describe the problem, pressures, or context surrounding this decision..."
-            style="min-height: 80px;"
-          ></textarea>
-        </div>
-
-        <!-- Dynamic Options Builder -->
-        <div class="form-group">
-          <label class="form-label">
-            Alternatives Considered & Selection <span style="color: var(--outcome-failed);">*</span>
-          </label>
-          <div class="form-hint" style="margin-bottom: 0.75rem;">
-            List at least 2 options you weighed. Select the radio button corresponding to your chosen option.
-          </div>
-          
-          <div class="options-builder" id="options-container">
-            <!-- Dynamically populated option rows by new-decision.js -->
-          </div>
-
-          <button type="button" class="btn btn-secondary" id="btn-add-option" style="margin-top: 0.75rem; font-size: 0.85rem; padding: 0.45rem 0.85rem;">
-            + Add Another Alternative
-          </button>
-        </div>
-
-        <!-- Chosen Reasoning -->
-        <div class="form-group">
-          <label for="reasoning" class="form-label">Reasoning & Justification <span style="color: var(--outcome-failed);">*</span></label>
-          <textarea 
-            id="reasoning" 
-            name="reasoning" 
-            class="form-control" 
-            placeholder="Why did you select this option over the other alternatives? What evidence or logic drove this choice?" 
-            required
-          ></textarea>
-          <div class="form-hint">Minimum 10 characters. Be brutally honest with your present rationale.</div>
-        </div>
-
-        <!-- Confidence Slider -->
-        <div class="form-group">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-            <label for="confidence" class="form-label" style="margin-bottom: 0;">Subjective Confidence Level <span style="color: var(--outcome-failed);">*</span></label>
-            <span class="slider-val-badge" id="confidence-val">75%</span>
-          </div>
-          <div class="slider-container">
-            <span style="font-size: 0.8rem; color: var(--text-muted);">0% (Uncertain)</span>
-            <input 
-              type="range" 
-              id="confidence" 
-              name="confidence" 
-              class="range-slider" 
-              min="0" 
-              max="100" 
-              value="75" 
-            />
-            <span style="font-size: 0.8rem; color: var(--text-muted);">100% (Certain)</span>
-          </div>
-          <div class="form-hint">How confident are you that this choice will achieve its goal?</div>
-        </div>
-
-        <!-- Expected Outcome -->
-        <div class="form-group">
-          <label for="expectedOutcome" class="form-label">Concrete Expected Outcome <span style="color: var(--outcome-failed);">*</span></label>
-          <textarea 
-            id="expectedOutcome" 
-            name="expectedOutcome" 
-            class="form-control" 
-            placeholder="What specific, measurable result or benefit do you predict will happen?" 
-            required
-            style="min-height: 85px;"
-          ></textarea>
-          <div class="form-hint">This prediction will be locked into history and compared with reality on your review date.</div>
         </div>
 
         <!-- Tags -->
@@ -180,32 +120,114 @@
             id="tags" 
             name="tags" 
             class="form-control" 
-            placeholder="e.g. database, architecture, performance (comma-separated)" 
+            placeholder="e.g. backend, redis, architecture (comma separated)" 
           />
+          <div class="form-hint">Separate multiple tags with commas.</div>
         </div>
 
-        <!-- Action Buttons -->
-        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem;">
-          <a href="/" class="btn btn-secondary" id="btn-cancel">Cancel</a>
-          <button type="submit" class="btn btn-primary" id="btn-submit">Lock In Decision</button>
+        <!-- Options Considered (Builder) -->
+        <div class="form-group" style="margin-top: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <label class="form-label" style="margin-bottom: 0;">
+              Options Considered & Choice Selection <span style="color: var(--outcome-failed);">*</span>
+            </label>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-option">+ Add Option</button>
+          </div>
+          <p class="form-hint" style="margin-bottom: 0.75rem;">
+            Enter at least 2 distinct alternatives and select the radio button for the option you chose.
+          </p>
+
+          <div id="options-container">
+            <!-- Dynamic option rows rendered here -->
+          </div>
         </div>
+
+        <!-- Optional Criteria & Weighted Scoring Section -->
+        <div class="form-group" style="margin-top: 2rem; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <label class="form-label" style="margin-bottom: 0.2rem;">Decision Criteria & Weighted Scoring (Optional)</label>
+              <p class="form-hint">Define evaluation criteria and weightings (e.g. Speed 40%, Cost 30%, Scalability 30%) to score options.</p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-criteria">
+              + Enable Criteria Scoring
+            </button>
+          </div>
+
+          <div id="criteria-section" style="display: none; margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <span style="font-size: 0.85rem; font-weight: 600;">Criteria List</span>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-add-criterion">+ Add Criterion</button>
+            </div>
+            <div id="criteria-container"></div>
+            
+            <!-- Calculated Weighted Scores Table Preview -->
+            <div id="criteria-matrix-preview" style="margin-top: 1rem; overflow-x: auto;"></div>
+          </div>
+        </div>
+
+        <!-- Underlying Reasoning -->
+        <div class="form-group" style="margin-top: 2rem; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem;">
+          <label for="reasoning" class="form-label">
+            Underlying Reasoning (Why did you make this choice?) <span style="color: var(--outcome-failed);">*</span>
+          </label>
+          <textarea 
+            id="reasoning" 
+            name="reasoning" 
+            class="form-control" 
+            rows="4" 
+            placeholder="Articulate your thesis. What trade-offs were acceptable? Why did you reject the alternatives?"
+            required
+            minlength="10"
+          ></textarea>
+        </div>
+
+        <!-- Expected Outcome -->
+        <div class="form-group">
+          <label for="expectedOutcome" class="form-label">
+            Concrete Expected Outcome (What should happen?) <span style="color: var(--outcome-failed);">*</span>
+          </label>
+          <textarea 
+            id="expectedOutcome" 
+            name="expectedOutcome" 
+            class="form-control" 
+            rows="3" 
+            placeholder="Document tangible metrics or milestones. What specific observable reality will confirm your hypothesis?"
+            required
+            minlength="5"
+          ></textarea>
+        </div>
+
+        <!-- Subjective Confidence Slider -->
+        <div class="form-group" style="margin-bottom: 2.5rem;">
+          <label for="confidence" class="form-label">Initial Confidence Level <span style="color: var(--outcome-failed);">*</span></label>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <input 
+              type="range" 
+              id="confidence" 
+              name="confidence" 
+              min="0" 
+              max="100" 
+              value="75" 
+              style="flex: 1; accent-color: var(--accent-primary); cursor: pointer;"
+            />
+            <span id="confidence-value" style="font-size: 1.25rem; font-weight: 800; color: var(--accent-primary); min-width: 55px; text-align: right;">75%</span>
+          </div>
+          <div class="form-hint">How sure are you that your expectation will materialize? Be honest — this feeds your calibration gap.</div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary" id="btn-submit" style="width: 100%; padding: 0.875rem; font-size: 1rem;">
+          Record Decision & Lock Hypothesis
+        </button>
 
       </form>
     </section>
 
   </main>
 
-  <!-- Global Toast Notification Container -->
   <div id="toast-container"></div>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <p>DecisionVault — Your Decisions Have a History. Built with Vanilla Web Standards & MongoDB.</p>
-    </div>
-  </footer>
-
-  <!-- Scripts -->
   <script src="/js/api.js"></script>
   <script src="/js/new-decision.js"></script>
 </body>

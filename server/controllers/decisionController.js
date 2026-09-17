@@ -1,9 +1,39 @@
 const Decision = require('../models/Decision');
 
 /**
- * @desc    Create a new decision
+ * Helper to compute weighted scores for criteria
+ */
+function calculateWeightedScores(options, criteria) {
+  if (!criteria || !Array.isArray(criteria) || criteria.length === 0) {
+    return [];
+  }
+
+  const optionTotals = {};
+  options.forEach((opt) => {
+    optionTotals[opt] = 0;
+  });
+
+  criteria.forEach((crit) => {
+    const weightFactor = (crit.weight || 0) / 100;
+    if (Array.isArray(crit.scores)) {
+      crit.scores.forEach((s) => {
+        if (optionTotals[s.option] !== undefined) {
+          optionTotals[s.option] += (s.score || 0) * weightFactor;
+        }
+      });
+    }
+  });
+
+  return Object.keys(optionTotals).map((opt) => ({
+    option: opt,
+    totalScore: Math.round(optionTotals[opt] * 100) / 100
+  }));
+}
+
+/**
+ * @desc    Create a new decision record
  * @route   POST /api/decisions
- * @access  Public
+ * @access  Private (Protected)
  */
 const createDecision = async (req, res, next) => {
   try {
@@ -11,103 +41,141 @@ const createDecision = async (req, res, next) => {
       title,
       description,
       category,
+      tags,
       options,
       selectedOption,
       reasoning,
       confidence,
       expectedOutcome,
       reviewDate,
-      tags
+      criteria
     } = req.body;
 
-    // Validate review date format
-    if (reviewDate && isNaN(Date.parse(reviewDate))) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid review date format. Must be a valid parseable date.'
-      });
-    }
+    const calculatedScores = calculateWeightedScores(options, criteria);
 
-    // Persist new decision document to MongoDB
+    const initialAudit = [
+      {
+        action: 'Decision Created',
+        details: `Created with ${confidence}% confidence for review on ${new Date(reviewDate).toLocaleDateString()}`,
+        timestamp: new Date()
+      }
+    ];
+
     const decision = await Decision.create({
+      userId: req.user._id,
       title,
       description,
       category,
+      tags: Array.isArray(tags) ? tags : [],
       options,
       selectedOption,
       reasoning,
       confidence,
       expectedOutcome,
       reviewDate,
-      tags
+      criteria: Array.isArray(criteria) ? criteria : [],
+      calculatedScores,
+      auditHistory: initialAudit
     });
 
-    // Return 201 Created with the saved document (including virtuals)
     res.status(201).json({
       success: true,
+      message: 'Decision recorded successfully',
       data: decision
     });
   } catch (error) {
-    // Pass validation errors or unexpected exceptions to centralized error middleware
     next(error);
   }
 };
 
 /**
- * @desc    Get all decisions with support for filtering, search, and sorting
+ * @desc    Fetch decisions belonging to authenticated user with filters & search
  * @route   GET /api/decisions
- * @access  Public
+ * @access  Private (Protected)
  */
 const getDecisions = async (req, res, next) => {
   try {
-    const { category, status, search, sort } = req.query;
+    const {
+      category,
+      status,
+      search,
+      sort,
+      favorite,
+      archived,
+      tag,
+      outcome
+    } = req.query;
 
-    // Initialize dynamic MongoDB query filter object
-    const query = {};
+    // Strict user scoping
+    const query = { userId: req.user._id };
 
-    // 1. Category Filter (e.g. Technology, Career, Finance)
+    // Archive filter: default to non-archived decisions unless explicitly requested
+    if (archived === 'true') {
+      query.isArchived = true;
+    } else {
+      query.isArchived = false;
+    }
+
+    // Favorite filter
+    if (favorite === 'true') {
+      query.isFavorite = true;
+    }
+
+    // Category filter
     if (category && category !== 'All') {
       query.category = category;
     }
 
-    // 2. Status Filter
-    // Because 'status' is a dynamic virtual getter (not a persisted column),
-    // we translate the virtual status request into equivalent MongoDB query conditions:
-    if (status) {
-      const now = new Date();
-      if (status === 'Reviewed') {
-        query['review.result'] = { $exists: true, $ne: null };
-      } else if (status === 'Review Due') {
-        query.review = null;
-        query.reviewDate = { $lte: now };
-      } else if (status === 'Pending Review') {
-        query.review = null;
-        query.reviewDate = { $gt: now };
-      }
+    // Tag filter
+    if (tag) {
+      query.tags = tag;
     }
 
-    // 3. Text Search (Case-insensitive regex across title, description, and reasoning)
-    if (search) {
+    // Outcome filter (Achieved, Partially Achieved, Not Achieved)
+    if (outcome) {
+      query['review.result'] = outcome;
+    }
+
+    // Dynamic Status filter translation
+    const now = new Date();
+    if (status === 'Reviewed') {
+      query['review.result'] = { $ne: null };
+    } else if (status === 'Review Due') {
+      query['review.result'] = null;
+      query.reviewDate = { $lte: now };
+    } else if (status === 'Pending Review') {
+      query['review.result'] = null;
+      query.reviewDate = { $gt: now };
+    }
+
+    // Search filter across text fields
+    if (search && search.trim() !== '') {
+      const searchRegex = new RegExp(search.trim(), 'i');
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { reasoning: { $regex: search, $options: 'i' } }
+        { title: searchRegex },
+        { description: searchRegex },
+        { reasoning: searchRegex },
+        { expectedOutcome: searchRegex },
+        { tags: searchRegex },
+        { 'review.actualOutcome': searchRegex },
+        { 'review.lessonLearned': searchRegex }
       ];
     }
 
-    // 4. Dynamic Sorting (Defaults to newest first)
-    let sortOption = { createdAt: -1 };
+    // Dynamic sorting
+    let sortOption = { createdAt: -1 }; // Default: Newest first
     if (sort === 'oldest') {
       sortOption = { createdAt: 1 };
-    } else if (sort === 'confidence_high') {
-      sortOption = { confidence: -1 };
-    } else if (sort === 'confidence_low') {
-      sortOption = { confidence: 1 };
-    } else if (sort === 'review_date') {
+    } else if (sort === 'reviewDate') {
       sortOption = { reviewDate: 1 };
+    } else if (sort === 'confidence-desc') {
+      sortOption = { confidence: -1 };
+    } else if (sort === 'confidence-asc') {
+      sortOption = { confidence: 1 };
+    } else if (sort === 'recentlyReviewed') {
+      sortOption = { 'review.reviewedAt': -1 };
     }
 
-    // Execute query with sorting
     const decisions = await Decision.find(query).sort(sortOption);
 
     res.status(200).json({
@@ -121,19 +189,21 @@ const getDecisions = async (req, res, next) => {
 };
 
 /**
- * @desc    Get single decision by ID
+ * @desc    Fetch single decision by ID with ownership enforcement
  * @route   GET /api/decisions/:id
- * @access  Public
+ * @access  Private (Protected)
  */
 const getDecisionById = async (req, res, next) => {
   try {
-    const decision = await Decision.findById(req.params.id);
+    const decision = await Decision.findOne({
+      _id: req.params.id,
+      userId: req.user._id
+    });
 
-    // If no document was found with this valid ObjectId
     if (!decision) {
       return res.status(404).json({
         success: false,
-        error: `Decision not found with ID: ${req.params.id}`
+        error: 'Decision not found or you do not have permission to view it'
       });
     }
 
@@ -142,31 +212,30 @@ const getDecisionById = async (req, res, next) => {
       data: decision
     });
   } catch (error) {
-    // If req.params.id is an invalid ObjectId format, Mongoose throws CastError,
-    // which errorHandler intercepts and cleanly returns 404
     next(error);
   }
 };
 
 /**
- * @desc    Update decision details (allowed only before review is submitted)
+ * @desc    Update unreviewed decision
  * @route   PUT /api/decisions/:id
- * @access  Public
+ * @access  Private (Protected)
  */
 const updateDecision = async (req, res, next) => {
   try {
-    const decision = await Decision.findById(req.params.id);
+    const decision = await Decision.findOne({
+      _id: req.params.id,
+      userId: req.user._id
+    });
 
     if (!decision) {
       return res.status(404).json({
         success: false,
-        error: `Decision not found with ID: ${req.params.id}`
+        error: 'Decision not found'
       });
     }
 
-    // Business Logic / Immutability Rule:
-    // Once a decision has been reviewed, its original premises, confidence,
-    // and expected outcome are permanently locked to preserve historical truth.
+    // Historical Immutability Invariant: Reviewed decisions cannot be edited!
     if (decision.review && decision.review.result) {
       return res.status(400).json({
         success: false,
@@ -174,24 +243,106 @@ const updateDecision = async (req, res, next) => {
       });
     }
 
-    // Prevent direct manipulation of review object through standard PUT route
-    if (req.body.review !== undefined) {
-      delete req.body.review;
+    // Prevent direct modification of review subdocument via PUT
+    delete req.body.review;
+    delete req.body.userId; // Prevent transferring ownership
+
+    // Recalculate criteria if updated
+    if (req.body.criteria || req.body.options) {
+      const opts = req.body.options || decision.options;
+      const crits = req.body.criteria || decision.criteria;
+      req.body.calculatedScores = calculateWeightedScores(opts, crits);
     }
 
-    // Update with new: true (returns updated doc) and runValidators: true (enforces schema checks on updates)
-    const updatedDecision = await Decision.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true
-      }
-    );
+    // Audit entry
+    const changes = Object.keys(req.body).filter(k => k !== 'auditHistory');
+    decision.auditHistory.push({
+      action: 'Decision Updated',
+      details: `Updated fields: ${changes.join(', ')}`,
+      timestamp: new Date()
+    });
+
+    Object.assign(decision, req.body);
+    await decision.save();
 
     res.status(200).json({
       success: true,
-      data: updatedDecision
+      message: 'Decision updated successfully',
+      data: decision
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Toggle favorite status
+ * @route   PATCH /api/decisions/:id/favorite
+ * @access  Private (Protected)
+ */
+const toggleFavorite = async (req, res, next) => {
+  try {
+    const decision = await Decision.findOne({
+      _id: req.params.id,
+      userId: req.user._id
+    });
+
+    if (!decision) {
+      return res.status(404).json({
+        success: false,
+        error: 'Decision not found'
+      });
+    }
+
+    decision.isFavorite = !decision.isFavorite;
+    decision.auditHistory.push({
+      action: decision.isFavorite ? 'Marked as Favorite' : 'Removed from Favorites',
+      timestamp: new Date()
+    });
+
+    await decision.save();
+
+    res.status(200).json({
+      success: true,
+      message: decision.isFavorite ? 'Added to favorites' : 'Removed from favorites',
+      data: decision
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Toggle archive status
+ * @route   PATCH /api/decisions/:id/archive
+ * @access  Private (Protected)
+ */
+const toggleArchive = async (req, res, next) => {
+  try {
+    const decision = await Decision.findOne({
+      _id: req.params.id,
+      userId: req.user._id
+    });
+
+    if (!decision) {
+      return res.status(404).json({
+        success: false,
+        error: 'Decision not found'
+      });
+    }
+
+    decision.isArchived = !decision.isArchived;
+    decision.auditHistory.push({
+      action: decision.isArchived ? 'Archived Decision' : 'Restored from Archive',
+      timestamp: new Date()
+    });
+
+    await decision.save();
+
+    res.status(200).json({
+      success: true,
+      message: decision.isArchived ? 'Decision archived' : 'Decision restored',
+      data: decision
     });
   } catch (error) {
     next(error);
@@ -201,25 +352,25 @@ const updateDecision = async (req, res, next) => {
 /**
  * @desc    Delete a decision
  * @route   DELETE /api/decisions/:id
- * @access  Public
+ * @access  Private (Protected)
  */
 const deleteDecision = async (req, res, next) => {
   try {
-    const decision = await Decision.findById(req.params.id);
+    const decision = await Decision.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id
+    });
 
     if (!decision) {
       return res.status(404).json({
         success: false,
-        error: `Decision not found with ID: ${req.params.id}`
+        error: 'Decision not found'
       });
     }
 
-    await Decision.findByIdAndDelete(req.params.id);
-
     res.status(200).json({
       success: true,
-      message: 'Decision deleted successfully',
-      data: {}
+      message: 'Decision deleted successfully'
     });
   } catch (error) {
     next(error);
@@ -227,24 +378,27 @@ const deleteDecision = async (req, res, next) => {
 };
 
 /**
- * @desc    Submit retrospective review for a decision
+ * @desc    Submit retrospective review & permanently seal decision
  * @route   POST /api/decisions/:id/review
- * @access  Public
+ * @access  Private (Protected)
  */
 const reviewDecision = async (req, res, next) => {
   try {
-    const { actualOutcome, result, lessonLearned } = req.body;
+    const { actualOutcome, result, outcomeScore, lessonLearned } = req.body;
 
-    const decision = await Decision.findById(req.params.id);
+    const decision = await Decision.findOne({
+      _id: req.params.id,
+      userId: req.user._id
+    });
 
     if (!decision) {
       return res.status(404).json({
         success: false,
-        error: `Decision not found with ID: ${req.params.id}`
+        error: 'Decision not found'
       });
     }
 
-    // Business Logic Rule: Duplicate Review Prevention
+    // Duplicate review guard
     if (decision.review && decision.review.result) {
       return res.status(400).json({
         success: false,
@@ -252,42 +406,25 @@ const reviewDecision = async (req, res, next) => {
       });
     }
 
-    // Explicit payload validation before attaching
-    if (!actualOutcome || !actualOutcome.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please provide what actually happened (actualOutcome is required).'
-      });
-    }
-
-    if (!result) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please evaluate whether the expected outcome was Achieved, Partially Achieved, or Not Achieved.'
-      });
-    }
-
-    if (!lessonLearned || !lessonLearned.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please document what you learned from this decision (lessonLearned is required).'
-      });
-    }
-
-    // Attach embedded review subdocument
     decision.review = {
-      actualOutcome: actualOutcome.trim(),
+      actualOutcome,
       result,
-      lessonLearned: lessonLearned.trim(),
+      outcomeScore: outcomeScore ? Number(outcomeScore) : null,
+      lessonLearned,
       reviewedAt: new Date()
     };
 
-    // Save document to trigger Mongoose embedded schema validation
+    decision.auditHistory.push({
+      action: 'Retrospective Review Completed',
+      details: `Evaluation: ${result} ${outcomeScore ? `(${outcomeScore}/10)` : ''}`,
+      timestamp: new Date()
+    });
+
     await decision.save();
 
     res.status(200).json({
       success: true,
-      message: 'Decision review recorded successfully',
+      message: 'Retrospective review recorded successfully. Decision is now permanently sealed.',
       data: decision
     });
   } catch (error) {
@@ -296,162 +433,170 @@ const reviewDecision = async (req, res, next) => {
 };
 
 /**
- * @desc    Calculate aggregate statistics and calibration metrics directly in MongoDB
- * @route   GET /api/decisions/stats
- * @access  Public
+ * @desc    Fetch all lessons learned from reviewed decisions
+ * @route   GET /api/decisions/lessons
+ * @access  Private (Protected)
  */
-const getDecisionStats = async (req, res, next) => {
+const getLessons = async (req, res, next) => {
   try {
-    const now = new Date();
-
-    // MongoDB Aggregation Pipeline: Calculates all metrics natively in database engine
-    const statsResult = await Decision.aggregate([
-      {
-        $facet: {
-          // 1. Total count and average confidence across all decisions
-          totalSummary: [
-            {
-              $group: {
-                _id: null,
-                total: { $sum: 1 },
-                avgConfidenceAll: { $avg: '$confidence' }
-              }
-            }
-          ],
-          // 2. Counts categorized by lifecycle status and review outcome
-          statusSummary: [
-            {
-              $group: {
-                _id: null,
-                reviewed: {
-                  $sum: {
-                    $cond: [{ $ifNull: ['$review.result', false] }, 1, 0]
-                  }
-                },
-                pending: {
-                  $sum: {
-                    $cond: [
-                      {
-                        $and: [
-                          { $eq: [{ $ifNull: ['$review.result', null] }, null] },
-                          { $gt: ['$reviewDate', now] }
-                        ]
-                      },
-                      1,
-                      0
-                    ]
-                  }
-                },
-                reviewDue: {
-                  $sum: {
-                    $cond: [
-                      {
-                        $and: [
-                          { $eq: [{ $ifNull: ['$review.result', null] }, null] },
-                          { $lte: ['$reviewDate', now] }
-                        ]
-                      },
-                      1,
-                      0
-                    ]
-                  }
-                },
-                achieved: {
-                  $sum: {
-                    $cond: [{ $eq: ['$review.result', 'Achieved'] }, 1, 0]
-                  }
-                },
-                partiallyAchieved: {
-                  $sum: {
-                    $cond: [{ $eq: ['$review.result', 'Partially Achieved'] }, 1, 0]
-                  }
-                },
-                notAchieved: {
-                  $sum: {
-                    $cond: [{ $eq: ['$review.result', 'Not Achieved'] }, 1, 0]
-                  }
-                }
-              }
-            }
-          ],
-          // 3. Average confidence specifically for Achieved decisions
-          achievedConfidence: [
-            { $match: { 'review.result': 'Achieved' } },
-            { $group: { _id: null, avgConfidence: { $avg: '$confidence' } } }
-          ],
-          // 4. Average confidence specifically for Not Achieved decisions
-          failedConfidence: [
-            { $match: { 'review.result': 'Not Achieved' } },
-            { $group: { _id: null, avgConfidence: { $avg: '$confidence' } } }
-          ],
-          // 5. Category breakdown
-          categoryBreakdown: [
-            {
-              $group: {
-                _id: '$category',
-                count: { $sum: 1 },
-                achievedCount: {
-                  $sum: {
-                    $cond: [{ $eq: ['$review.result', 'Achieved'] }, 1, 0]
-                  }
-                }
-              }
-            },
-            { $sort: { count: -1 } }
-          ]
-        }
-      }
-    ]);
-
-    const facet = statsResult[0];
-
-    const total = facet.totalSummary[0]?.total || 0;
-    const avgConfidenceAll = Math.round(facet.totalSummary[0]?.avgConfidenceAll || 0);
-
-    const status = facet.statusSummary[0] || {
-      reviewed: 0,
-      pending: 0,
-      reviewDue: 0,
-      achieved: 0,
-      partiallyAchieved: 0,
-      notAchieved: 0
+    const { category, search } = req.query;
+    const query = {
+      userId: req.user._id,
+      'review.result': { $ne: null }
     };
 
-    const avgConfidenceAchieved = Math.round(facet.achievedConfidence[0]?.avgConfidence || 0);
-    const avgConfidenceFailed = Math.round(facet.failedConfidence[0]?.avgConfidence || 0);
+    if (category && category !== 'All') {
+      query.category = category;
+    }
 
-    // Calculate percentage hit rate
-    const successRate = status.reviewed > 0
-      ? Math.round((status.achieved / status.reviewed) * 100)
-      : 0;
+    if (search && search.trim() !== '') {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      query.$or = [
+        { title: searchRegex },
+        { 'review.lessonLearned': searchRegex },
+        { tags: searchRegex }
+      ];
+    }
 
-    // Calibration Gap: Difference between overall confidence and actual success rate
-    // Positive gap indicates overconfidence; negative indicates humility/underconfidence
-    const calibrationGap = status.reviewed > 0
-      ? avgConfidenceAll - successRate
-      : 0;
+    const reviewed = await Decision.find(query)
+      .select('title category review createdAt reviewDate tags confidence')
+      .sort({ 'review.reviewedAt': -1 });
+
+    const lessons = reviewed.map((d) => ({
+      decisionId: d._id,
+      title: d.title,
+      category: d.category,
+      tags: d.tags,
+      confidence: d.confidence,
+      result: d.review.result,
+      outcomeScore: d.review.outcomeScore,
+      lessonLearned: d.review.lessonLearned,
+      actualOutcome: d.review.actualOutcome,
+      reviewedAt: d.review.reviewedAt
+    }));
 
     res.status(200).json({
       success: true,
-      data: {
-        totalDecisions: total,
-        reviewedCount: status.reviewed,
-        pendingCount: status.pending,
-        dueCount: status.reviewDue,
-        achievedCount: status.achieved,
-        partiallyAchievedCount: status.partiallyAchieved,
-        notAchievedCount: status.notAchieved,
-        successRate,
-        avgConfidenceAll,
-        avgConfidenceAchieved,
-        avgConfidenceFailed,
-        calibrationGap,
-        categoryBreakdown: (facet.categoryBreakdown || []).map((cat) => ({
-          category: cat._id,
-          count: cat.count,
-          achievedCount: cat.achievedCount
-        }))
+      count: lessons.length,
+      data: lessons
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Fetch decision calendar timeline events
+ * @route   GET /api/decisions/calendar
+ * @access  Private (Protected)
+ */
+const getCalendarEvents = async (req, res, next) => {
+  try {
+    const decisions = await Decision.find({ userId: req.user._id }).select(
+      'title category reviewDate createdAt review status isFavorite'
+    );
+
+    const events = [];
+    decisions.forEach((d) => {
+      // Event 1: Creation
+      events.push({
+        id: `${d._id}_created`,
+        decisionId: d._id,
+        title: `Decided: ${d.title}`,
+        category: d.category,
+        date: d.createdAt,
+        type: 'created',
+        status: d.status
+      });
+
+      // Event 2: Target Review Date
+      events.push({
+        id: `${d._id}_due`,
+        decisionId: d._id,
+        title: `Review: ${d.title}`,
+        category: d.category,
+        date: d.reviewDate,
+        type: 'due',
+        status: d.status
+      });
+
+      // Event 3: Reviewed (if completed)
+      if (d.review && d.review.reviewedAt) {
+        events.push({
+          id: `${d._id}_reviewed`,
+          decisionId: d._id,
+          title: `Reviewed [${d.review.result}]: ${d.title}`,
+          category: d.category,
+          date: d.review.reviewedAt,
+          type: 'reviewed',
+          result: d.review.result,
+          status: d.status
+        });
       }
+    });
+
+    res.status(200).json({
+      success: true,
+      count: events.length,
+      data: events
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Export user decisions as JSON or CSV
+ * @route   GET /api/decisions/export
+ * @access  Private (Protected)
+ */
+const exportDecisions = async (req, res, next) => {
+  try {
+    const format = (req.query.format || 'json').toLowerCase();
+    const decisions = await Decision.find({ userId: req.user._id }).sort({ createdAt: -1 });
+
+    if (format === 'csv') {
+      const headers = [
+        'ID',
+        'Title',
+        'Category',
+        'Confidence',
+        'Selected Option',
+        'Status',
+        'Created Date',
+        'Review Date',
+        'Result',
+        'Outcome Score',
+        'Actual Outcome',
+        'Lesson Learned'
+      ];
+
+      const rows = decisions.map((d) => [
+        `"${d._id}"`,
+        `"${(d.title || '').replace(/"/g, '""')}"`,
+        `"${d.category}"`,
+        d.confidence,
+        `"${(d.selectedOption || '').replace(/"/g, '""')}"`,
+        `"${d.status}"`,
+        `"${new Date(d.createdAt).toISOString()}"`,
+        `"${new Date(d.reviewDate).toISOString()}"`,
+        `"${(d.review?.result || '').replace(/"/g, '""')}"`,
+        d.review?.outcomeScore || '',
+        `"${(d.review?.actualOutcome || '').replace(/"/g, '""')}"`,
+        `"${(d.review?.lessonLearned || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="decisionvault_export.csv"');
+      return res.status(200).send(csvContent);
+    }
+
+    res.status(200).json({
+      success: true,
+      count: decisions.length,
+      data: decisions
     });
   } catch (error) {
     next(error);
@@ -464,6 +609,10 @@ module.exports = {
   getDecisionById,
   updateDecision,
   deleteDecision,
+  toggleFavorite,
+  toggleArchive,
   reviewDecision,
-  getDecisionStats
+  getLessons,
+  getCalendarEvents,
+  exportDecisions
 };
