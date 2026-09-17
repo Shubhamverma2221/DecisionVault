@@ -1,10 +1,35 @@
 const Decision = require('../models/Decision');
 
 /**
+ * Helper to normalize criteria so scores can be provided either as an array of objects
+ * [{ option: 'A', score: 8 }] OR as an object/map { 'A': 8, 'B': 6 }
+ */
+function normalizeCriteria(criteria) {
+  if (!criteria || !Array.isArray(criteria)) return [];
+  return criteria.map((crit) => {
+    let scoresArray = [];
+    if (Array.isArray(crit.scores)) {
+      scoresArray = crit.scores;
+    } else if (crit.scores && typeof crit.scores === 'object') {
+      scoresArray = Object.keys(crit.scores).map((opt) => ({
+        option: opt,
+        score: Number(crit.scores[opt])
+      }));
+    }
+    return {
+      name: crit.name,
+      weight: Number(crit.weight),
+      scores: scoresArray
+    };
+  });
+}
+
+/**
  * Helper to compute weighted scores for criteria
  */
 function calculateWeightedScores(options, criteria) {
-  if (!criteria || !Array.isArray(criteria) || criteria.length === 0) {
+  const norm = normalizeCriteria(criteria);
+  if (!norm || norm.length === 0 || !Array.isArray(options)) {
     return [];
   }
 
@@ -13,7 +38,7 @@ function calculateWeightedScores(options, criteria) {
     optionTotals[opt] = 0;
   });
 
-  criteria.forEach((crit) => {
+  norm.forEach((crit) => {
     const weightFactor = (crit.weight || 0) / 100;
     if (Array.isArray(crit.scores)) {
       crit.scores.forEach((s) => {
@@ -51,7 +76,8 @@ const createDecision = async (req, res, next) => {
       criteria
     } = req.body;
 
-    const calculatedScores = calculateWeightedScores(options, criteria);
+    const normalizedCriteria = normalizeCriteria(criteria);
+    const calculatedScores = calculateWeightedScores(options, normalizedCriteria);
 
     const initialAudit = [
       {
@@ -73,7 +99,7 @@ const createDecision = async (req, res, next) => {
       confidence,
       expectedOutcome,
       reviewDate,
-      criteria: Array.isArray(criteria) ? criteria : [],
+      criteria: normalizedCriteria,
       calculatedScores,
       auditHistory: initialAudit
     });
@@ -250,6 +276,9 @@ const updateDecision = async (req, res, next) => {
     // Recalculate criteria if updated
     if (req.body.criteria || req.body.options) {
       const opts = req.body.options || decision.options;
+      if (req.body.criteria) {
+        req.body.criteria = normalizeCriteria(req.body.criteria);
+      }
       const crits = req.body.criteria || decision.criteria;
       req.body.calculatedScores = calculateWeightedScores(opts, crits);
     }

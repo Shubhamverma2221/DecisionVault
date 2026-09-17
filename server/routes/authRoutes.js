@@ -16,5 +16,6 @@ router.post('/guest', loginGuest);
 router.post('/google', googleAuth);
 router.get('/me', protect, getMe);
 router.post('/convert-guest', protect, convertGuestToAccount);
+router.put('/convert-guest', protect, convertGuestToAccount);
 
 module.exports = router;

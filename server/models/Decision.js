@@ -118,7 +118,7 @@ const decisionSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Category is required'],
       enum: {
-        values: ['Technology', 'Career', 'Finance', 'Education', 'Projects', 'Personal', 'Health', 'Other'],
+        values: ['Technology', 'Career', 'Finance', 'Product', 'Education', 'Projects', 'Personal', 'Health', 'Other'],
         message: '{VALUE} is not a supported category'
       },
       default: 'Technology'
