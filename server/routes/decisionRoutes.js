@@ -7,7 +7,8 @@ const {
   getDecisionById,
   updateDecision,
   deleteDecision,
-  reviewDecision
+  reviewDecision,
+  getDecisionStats
 } = require('../controllers/decisionController');
 
 // =========================================
@@ -19,6 +20,14 @@ router
   .route('/')
   .get(getDecisions)
   .post(createDecision);
+
+// Aggregate Statistics Route: /api/decisions/stats
+// CRITICAL ORDERING RULE:
+// This specific route MUST be defined BEFORE the parameter route '/:id'.
+// Otherwise, Express will capture '/stats' as req.params.id and fail with a CastError!
+router
+  .route('/stats')
+  .get(getDecisionStats);
 
 // Individual resource routes: /api/decisions/:id
 router

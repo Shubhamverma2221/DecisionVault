@@ -245,7 +245,6 @@ const reviewDecision = async (req, res, next) => {
     }
 
     // Business Logic Rule: Duplicate Review Prevention
-    // A decision can only be reviewed once. Once reviewed, it is permanently locked.
     if (decision.review && decision.review.result) {
       return res.status(400).json({
         success: false,
@@ -296,11 +295,175 @@ const reviewDecision = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Calculate aggregate statistics and calibration metrics directly in MongoDB
+ * @route   GET /api/decisions/stats
+ * @access  Public
+ */
+const getDecisionStats = async (req, res, next) => {
+  try {
+    const now = new Date();
+
+    // MongoDB Aggregation Pipeline: Calculates all metrics natively in database engine
+    const statsResult = await Decision.aggregate([
+      {
+        $facet: {
+          // 1. Total count and average confidence across all decisions
+          totalSummary: [
+            {
+              $group: {
+                _id: null,
+                total: { $sum: 1 },
+                avgConfidenceAll: { $avg: '$confidence' }
+              }
+            }
+          ],
+          // 2. Counts categorized by lifecycle status and review outcome
+          statusSummary: [
+            {
+              $group: {
+                _id: null,
+                reviewed: {
+                  $sum: {
+                    $cond: [{ $ifNull: ['$review.result', false] }, 1, 0]
+                  }
+                },
+                pending: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $and: [
+                          { $eq: [{ $ifNull: ['$review.result', null] }, null] },
+                          { $gt: ['$reviewDate', now] }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                reviewDue: {
+                  $sum: {
+                    $cond: [
+                      {
+                        $and: [
+                          { $eq: [{ $ifNull: ['$review.result', null] }, null] },
+                          { $lte: ['$reviewDate', now] }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
+                },
+                achieved: {
+                  $sum: {
+                    $cond: [{ $eq: ['$review.result', 'Achieved'] }, 1, 0]
+                  }
+                },
+                partiallyAchieved: {
+                  $sum: {
+                    $cond: [{ $eq: ['$review.result', 'Partially Achieved'] }, 1, 0]
+                  }
+                },
+                notAchieved: {
+                  $sum: {
+                    $cond: [{ $eq: ['$review.result', 'Not Achieved'] }, 1, 0]
+                  }
+                }
+              }
+            }
+          ],
+          // 3. Average confidence specifically for Achieved decisions
+          achievedConfidence: [
+            { $match: { 'review.result': 'Achieved' } },
+            { $group: { _id: null, avgConfidence: { $avg: '$confidence' } } }
+          ],
+          // 4. Average confidence specifically for Not Achieved decisions
+          failedConfidence: [
+            { $match: { 'review.result': 'Not Achieved' } },
+            { $group: { _id: null, avgConfidence: { $avg: '$confidence' } } }
+          ],
+          // 5. Category breakdown
+          categoryBreakdown: [
+            {
+              $group: {
+                _id: '$category',
+                count: { $sum: 1 },
+                achievedCount: {
+                  $sum: {
+                    $cond: [{ $eq: ['$review.result', 'Achieved'] }, 1, 0]
+                  }
+                }
+              }
+            },
+            { $sort: { count: -1 } }
+          ]
+        }
+      }
+    ]);
+
+    const facet = statsResult[0];
+
+    const total = facet.totalSummary[0]?.total || 0;
+    const avgConfidenceAll = Math.round(facet.totalSummary[0]?.avgConfidenceAll || 0);
+
+    const status = facet.statusSummary[0] || {
+      reviewed: 0,
+      pending: 0,
+      reviewDue: 0,
+      achieved: 0,
+      partiallyAchieved: 0,
+      notAchieved: 0
+    };
+
+    const avgConfidenceAchieved = Math.round(facet.achievedConfidence[0]?.avgConfidence || 0);
+    const avgConfidenceFailed = Math.round(facet.failedConfidence[0]?.avgConfidence || 0);
+
+    // Calculate percentage hit rate
+    const successRate = status.reviewed > 0
+      ? Math.round((status.achieved / status.reviewed) * 100)
+      : 0;
+
+    // Calibration Gap: Difference between overall confidence and actual success rate
+    // Positive gap indicates overconfidence; negative indicates humility/underconfidence
+    const calibrationGap = status.reviewed > 0
+      ? avgConfidenceAll - successRate
+      : 0;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalDecisions: total,
+        reviewedCount: status.reviewed,
+        pendingCount: status.pending,
+        dueCount: status.reviewDue,
+        achievedCount: status.achieved,
+        partiallyAchievedCount: status.partiallyAchieved,
+        notAchievedCount: status.notAchieved,
+        successRate,
+        avgConfidenceAll,
+        avgConfidenceAchieved,
+        avgConfidenceFailed,
+        calibrationGap,
+        categoryBreakdown: (facet.categoryBreakdown || []).map((cat) => ({
+          category: cat._id,
+          count: cat.count,
+          achievedCount: cat.achievedCount
+        }))
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createDecision,
   getDecisions,
   getDecisionById,
   updateDecision,
   deleteDecision,
-  reviewDecision
+  reviewDecision,
+  getDecisionStats
 };
