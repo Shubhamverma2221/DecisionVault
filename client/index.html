@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DecisionVault — Document your reasoning, lock your expectations, and review the history of your decisions.">
+  <title>DecisionVault — Your Decisions Have a History</title>
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="/" class="brand-logo" id="brand-link">
+        <div class="brand-icon">DV</div>
+        <span>DecisionVault</span>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link active" id="nav-dashboard">Dashboard</a></li>
+          <li><a href="/new-decision.html" class="btn btn-primary" id="btn-create-nav">+ New Decision</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container" style="padding-top: 2.5rem;">
+    
+    <!-- Hero / Header Section -->
+    <section style="margin-bottom: 2rem;">
+      <h1 id="page-heading">Decision Intelligence Dashboard</h1>
+      <p id="page-subheading">Track your choices, eliminate hindsight bias, and calibrate your future judgment.</p>
+    </section>
+
+    <!-- Analytics & Stats Grid -->
+    <section class="stats-grid" id="stats-grid" aria-label="Decision Statistics">
+      <!-- Total Decisions Card -->
+      <div class="stat-card" id="stat-card-total">
+        <div class="stat-label">Total Decisions</div>
+        <div class="stat-value" id="stat-total">--</div>
+        <div class="stat-subtitle" id="stat-total-sub">Total recorded choices</div>
+      </div>
+
+      <!-- Reviews Due Card -->
+      <div class="stat-card" id="stat-card-due">
+        <div class="stat-label">Reviews Due</div>
+        <div class="stat-value" id="stat-due" style="color: var(--status-due-text);">--</div>
+        <div class="stat-subtitle" id="stat-due-sub">Ready for outcome evaluation</div>
+      </div>
+
+      <!-- Pending Reviews Card -->
+      <div class="stat-card" id="stat-card-pending">
+        <div class="stat-label">Pending Reviews</div>
+        <div class="stat-value" id="stat-pending" style="color: var(--status-pending-text);">--</div>
+        <div class="stat-subtitle" id="stat-pending-sub">Awaiting target review dates</div>
+      </div>
+
+      <!-- Success Rate Card -->
+      <div class="stat-card" id="stat-card-rate">
+        <div class="stat-label">Success Rate (Achieved)</div>
+        <div class="stat-value" id="stat-success-rate">--%</div>
+        <div class="stat-subtitle" id="stat-success-sub">Of evaluated decisions</div>
+      </div>
+
+      <!-- Calibration Gap Card -->
+      <div class="stat-card" id="stat-card-calibration">
+        <div class="stat-label">Calibration Gap</div>
+        <div class="stat-value" id="stat-calibration-gap">--</div>
+        <div class="stat-subtitle" id="stat-calibration-sub">Confidence vs reality accuracy</div>
+      </div>
+    </section>
+
+    <!-- Toolbar: Search, Category Filter Pills, Status & Sort -->
+    <section class="toolbar" id="filter-toolbar">
+      <div class="toolbar-row">
+        <!-- Search Box -->
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            id="search-input" 
+            placeholder="Search decisions by title, reasoning, or keyword..." 
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- Filter Controls Group -->
+        <div class="filter-group">
+          <!-- Status Select -->
+          <select class="select-control" id="status-filter" aria-label="Filter by lifecycle status">
+            <option value="">All Statuses</option>
+            <option value="Review Due">Review Due</option>
+            <option value="Pending Review">Pending Review</option>
+            <option value="Reviewed">Reviewed</option>
+          </select>
+
+          <!-- Sort Select -->
+          <select class="select-control" id="sort-filter" aria-label="Sort decisions">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="confidence_high">Confidence: High to Low</option>
+            <option value="confidence_low">Confidence: Low to High</option>
+            <option value="review_date">Review Date: Earliest</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="category-pills" id="category-pills">
+        <button type="button" class="pill-btn active" data-category="All">All Categories</button>
+        <button type="button" class="pill-btn" data-category="Technology">Technology</button>
+        <button type="button" class="pill-btn" data-category="Career">Career</button>
+        <button type="button" class="pill-btn" data-category="Finance">Finance</button>
+        <button type="button" class="pill-btn" data-category="Product">Product</button>
+        <button type="button" class="pill-btn" data-category="Life">Life</button>
+        <button type="button" class="pill-btn" data-category="Other">Other</button>
+      </div>
+    </section>
+
+    <!-- Decisions Container -->
+    <section id="decisions-section" aria-label="Decisions List">
+      <!-- Loading Spinner (Shown during fetches) -->
+      <div class="spinner" id="loading-spinner" style="display: none;"></div>
+
+      <!-- Grid of Decision Cards -->
+      <div class="decisions-grid" id="decisions-grid"></div>
+
+      <!-- Empty State (Shown when zero decisions match) -->
+      <div class="empty-state" id="empty-state" style="display: none;">
+        <div class="empty-icon">🏛</div>
+        <h2>No Decisions Found</h2>
+        <p style="margin: 0.75rem 0 1.5rem;">No decisions match your active filters, or you haven't recorded your first decision yet.</p>
+        <a href="/new-decision.html" class="btn btn-primary" id="btn-empty-create">+ Record Your First Decision</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Global Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>DecisionVault — Your Decisions Have a History. Built with Vanilla Web Standards & MongoDB.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/js/api.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
