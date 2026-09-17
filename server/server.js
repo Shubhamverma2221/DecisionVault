@@ -45,6 +45,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Mount decision routes under /api/decisions
+const decisionRoutes = require('./routes/decisionRoutes');
+app.use('/api/decisions', decisionRoutes);
+
 // =========================================
 // Error Handling Middleware
 // =========================================
