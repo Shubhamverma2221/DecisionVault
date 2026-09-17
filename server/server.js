@@ -33,6 +33,8 @@ app.use(express.static(path.join(__dirname, '../client')));
 // Base / Health Check Routes
 // =========================================
 
+const { notFound, errorHandler } = require('./middleware/errorHandler');
+
 // Health check endpoint to verify that the server is alive and responding
 app.get('/api/health', (req, res) => {
   res.status(200).json({
@@ -42,6 +44,16 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// =========================================
+// Error Handling Middleware
+// =========================================
+
+// Catch 404 for undefined routes and forward to error handler
+app.use(notFound);
+
+// Centralized error handler
+app.use(errorHandler);
 
 // =========================================
 // Server Initialization
