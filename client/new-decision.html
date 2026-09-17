@@ -46,7 +46,7 @@
       <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; display: inline-block; margin-bottom: 0.5rem;">← Back to Dashboard</a>
       <h1 style="font-size: 2.25rem;">Record a New Decision</h1>
       <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
-        Document the competing options you weighed, the reasoning behind your choice, and the exact outcome you expect to see.
+        Write down the options you considered, why you chose this one, and what you expect to happen.
       </p>
     </div>
 
@@ -62,11 +62,11 @@
             id="title" 
             name="title" 
             class="form-control" 
-            placeholder="e.g. Migrate session storage to Redis cluster" 
+            placeholder="e.g. Switch from AWS to Render for hosting" 
             maxlength="150" 
             required 
           />
-          <div class="form-hint">Frame your decision clearly as an actionable choice or question.</div>
+          <div class="form-hint">Write a clear name or question for your decision.</div>
         </div>
 
         <!-- Description -->
@@ -77,7 +77,7 @@
             name="description" 
             class="form-control" 
             rows="2" 
-            placeholder="Provide background context, project scope, or business drivers..."
+            placeholder="Provide background context or project details..."
           ></textarea>
         </div>
 
@@ -177,7 +177,7 @@
             name="reasoning" 
             class="form-control" 
             rows="4" 
-            placeholder="Articulate your thesis. What trade-offs were acceptable? Why did you reject the alternatives?"
+            placeholder="Why did you pick this option over the others? What made it the best choice?"
             required
             minlength="10"
           ></textarea>
@@ -186,14 +186,14 @@
         <!-- Expected Outcome -->
         <div class="form-group">
           <label for="expectedOutcome" class="form-label">
-            Concrete Expected Outcome (What should happen?) <span style="color: var(--outcome-failed);">*</span>
+            What do you expect to happen? <span style="color: var(--outcome-failed);">*</span>
           </label>
           <textarea 
             id="expectedOutcome" 
             name="expectedOutcome" 
             class="form-control" 
             rows="3" 
-            placeholder="Document tangible metrics or milestones. What specific observable reality will confirm your hypothesis?"
+            placeholder="What do you think will happen? Describe what success looks like."
             required
             minlength="5"
           ></textarea>
@@ -201,7 +201,7 @@
 
         <!-- Subjective Confidence Slider -->
         <div class="form-group" style="margin-bottom: 2.5rem;">
-          <label for="confidence" class="form-label">Initial Confidence Level <span style="color: var(--outcome-failed);">*</span></label>
+          <label for="confidence" class="form-label">How confident are you? <span style="color: var(--outcome-failed);">*</span></label>
           <div style="display: flex; align-items: center; gap: 1rem;">
             <input 
               type="range" 
@@ -214,12 +214,12 @@
             />
             <span id="confidence-value" style="font-size: 1.25rem; font-weight: 800; color: var(--accent-primary); min-width: 55px; text-align: right;">75%</span>
           </div>
-          <div class="form-hint">How sure are you that your expectation will materialize? Be honest — this feeds your calibration gap.</div>
+          <div class="form-hint">How sure are you about this choice? (0% = guessing, 100% = completely sure).</div>
         </div>
 
         <!-- Submit Button -->
         <button type="submit" class="btn btn-primary" id="btn-submit" style="width: 100%; padding: 0.875rem; font-size: 1rem;">
-          Record Decision & Lock Hypothesis
+          Save Decision
         </button>
 
       </form>

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Conduct a retrospective review on an existing decision. Evaluate actual empirical outcomes, calibrate prediction accuracy, and document lessons learned.">
-  <title>Conduct Retrospective Review — DecisionVault</title>
+  <meta name="description" content="Review your decision results, see what really happened, and save lessons learned.">
+  <title>Review Decision — DecisionVault</title>
 
   <!-- Google Fonts: Outfit, Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,26 +68,26 @@
           <span class="badge" id="header-status-badge">Review Due</span>
           <span class="badge badge-category" id="header-category-badge">Category</span>
         </div>
-        <h1 style="font-size: 2.25rem; max-width: 800px; margin: 0 auto 0.5rem;">Conduct Retrospective Review</h1>
+        <h1 style="font-size: 2.25rem; max-width: 800px; margin: 0 auto 0.5rem;">Review Your Decision</h1>
         <p style="max-width: 650px; margin: 0 auto; font-size: 1rem; color: var(--text-secondary);">
-          Confront your initial hypothesis with empirical reality. Once recorded, this decision record is permanently sealed against hindsight bias.
+          Compare what you expected with what really happened. Once saved, this decision is permanently locked so you can always see your true thinking.
         </p>
       </section>
 
       <!-- Already Reviewed Warning Banner & Card (Shown if decision is already locked) -->
       <div id="already-reviewed-card" style="display: none; max-width: 750px; margin: 0 auto 3rem; background: #ffffff; border: 1px solid var(--status-reviewed-border); border-radius: var(--radius-lg); padding: 2.5rem; text-align: center; box-shadow: var(--shadow-sm);">
         <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
-        <h2 style="font-size: 1.75rem; color: var(--status-reviewed); margin-bottom: 0.75rem;">This Decision is Permanently Sealed</h2>
+        <h2 style="font-size: 1.75rem; color: var(--status-reviewed); margin-bottom: 0.75rem;">This Decision is Already Reviewed and Locked</h2>
         <p style="color: var(--text-secondary); margin-bottom: 1.5rem; max-width: 550px; margin-left: auto; margin-right: auto;">
-          In accordance with the <strong>Historical Immutability Rule</strong>, a retrospective review has already been finalized for this decision and cannot be modified.
+          This decision has already been reviewed. To keep your history honest, reviews cannot be changed once saved.
         </p>
         <div style="background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; text-align: left; margin-bottom: 2rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-            <span style="font-size: 0.85rem; color: var(--text-muted);">Recorded Review Result:</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Result:</span>
             <span class="badge" id="sealed-review-badge">Result</span>
           </div>
           <div style="margin-bottom: 0.75rem;">
-            <strong style="font-size: 0.85rem; color: var(--text-muted); display: block;">Actual Outcome:</strong>
+            <strong style="font-size: 0.85rem; color: var(--text-muted); display: block;">What Actually Happened:</strong>
             <p id="sealed-actual-outcome" style="margin-top: 0.25rem; font-size: 0.95rem; color: var(--text-primary);"></p>
           </div>
           <div>
@@ -95,7 +95,7 @@
             <p id="sealed-lesson-learned" style="margin-top: 0.25rem; font-size: 0.95rem; color: var(--text-primary);"></p>
           </div>
         </div>
-        <a href="#" id="btn-view-sealed-history" class="btn btn-primary">View Full History Timeline →</a>
+        <a href="#" id="btn-view-sealed-history" class="btn btn-primary">View Full Decision Details →</a>
       </div>
 
       <!-- Active Review Layout: Original Premise Context Card + Review Form -->
@@ -105,7 +105,7 @@
         <section class="form-card" style="padding: 2rem; border-color: #c7d2fe; background: #ffffff;" aria-label="Original Decision Premises">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
             <div>
-              <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-primary); font-weight: 700; display: block; margin-bottom: 0.25rem;">Original Hypothesis (Milestone 1)</span>
+              <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-primary); font-weight: 700; display: block; margin-bottom: 0.25rem;">What You Planned (Step 1)</span>
               <h2 id="context-decision-title" style="font-size: 1.35rem; color: var(--text-primary); margin: 0;">--</h2>
             </div>
             <div>
@@ -115,22 +115,22 @@
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; padding: 1rem; background: #f8fafc; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
             <div>
-              <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Target Review Date:</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Review Date:</span>
               <span id="context-review-date" style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">--</span>
             </div>
             <div>
-              <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Selected Option:</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Chosen Option:</span>
               <span id="context-selected-option" style="font-weight: 700; font-size: 0.9rem; color: var(--accent-primary);">--</span>
             </div>
           </div>
 
           <div style="margin-bottom: 1rem;">
-            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Underlying Reasoning:</span>
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Why You Chose This:</span>
             <p id="context-reasoning" style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin: 0; background: #f1f5f9; padding: 0.75rem; border-radius: var(--radius-sm);"></p>
           </div>
 
           <div>
-            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Concrete Expected Outcome:</span>
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">What You Expected to Happen:</span>
             <p id="context-expected-outcome" style="font-size: 0.9rem; color: #1e1b4b; line-height: 1.5; margin: 0; background: #eef2ff; padding: 0.75rem; border-radius: var(--radius-sm); border-left: 3px solid var(--accent-primary);"></p>
           </div>
         </section>
@@ -140,31 +140,31 @@
           <form id="review-form" novalidate>
             
             <div style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
-              <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--outcome-achieved); font-weight: 700; display: block; margin-bottom: 0.25rem;">Milestone 2</span>
-              <h2 style="font-size: 1.4rem; margin: 0;">Document Empirical Reality</h2>
+              <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--outcome-achieved); font-weight: 700; display: block; margin-bottom: 0.25rem;">Step 2</span>
+              <h2 style="font-size: 1.4rem; margin: 0;">What Actually Happened</h2>
             </div>
 
             <!-- Field 1: Actual Outcome -->
             <div class="form-group">
               <label for="actualOutcome" class="form-label">
-                Actual Outcome (What objectively happened?) <span style="color: var(--outcome-failed);">*</span>
+                Actual Result (What really happened?) <span style="color: var(--outcome-failed);">*</span>
               </label>
               <textarea 
                 id="actualOutcome" 
                 name="actualOutcome" 
                 class="form-control" 
                 rows="4" 
-                placeholder="State what objectively materialized. What were the real metrics, response times, adoption rates, or financial results? Be brutally honest..."
+                placeholder="Describe what actually happened in real life. What were the real results, numbers, or reactions? Be honest..."
                 required
                 minlength="5"
               ></textarea>
-              <div class="form-hint">Describe concrete empirical facts rather than subjective rationalizations.</div>
+              <div class="form-hint">Tell what really happened compared to what you hoped for.</div>
             </div>
 
             <!-- Field 2: Evaluation Result (3 Pill Radio Buttons) -->
             <div class="form-group">
               <label class="form-label">
-                Outcome Evaluation <span style="color: var(--outcome-failed);">*</span>
+                How did it turn out? <span style="color: var(--outcome-failed);">*</span>
               </label>
               <div class="outcome-pill-group" role="radiogroup" aria-label="Outcome Evaluation Options">
                 
@@ -172,28 +172,28 @@
                   <input type="radio" name="result" value="Achieved" required />
                   <span style="font-size: 1.35rem; margin-bottom: 0.35rem;">🎯</span>
                   <span style="font-size: 0.95rem; font-weight: 600;">Achieved</span>
-                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Hypothesis confirmed</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Went as expected</span>
                 </label>
 
                 <label class="outcome-radio-label" id="label-result-partial">
                   <input type="radio" name="result" value="Partially Achieved" required />
                   <span style="font-size: 1.35rem; margin-bottom: 0.35rem;">⚖️</span>
                   <span style="font-size: 0.95rem; font-weight: 600;">Partially Achieved</span>
-                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Compromised results</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Some parts worked</span>
                 </label>
 
                 <label class="outcome-radio-label" id="label-result-failed">
                   <input type="radio" name="result" value="Not Achieved" required />
                   <span style="font-size: 1.35rem; margin-bottom: 0.35rem;">❌</span>
                   <span style="font-size: 0.95rem; font-weight: 600;">Not Achieved</span>
-                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Hypothesis falsified</span>
+                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Did not go as planned</span>
                 </label>
               </div>
             </div>
 
             <!-- Field 3: Quantitative Outcome Score (1 to 10) -->
             <div class="form-group">
-              <label for="outcomeScore" class="form-label">Outcome Score (1 to 10)</label>
+              <label for="outcomeScore" class="form-label">Rating (1 to 10)</label>
               <div style="display: flex; align-items: center; gap: 1rem;">
                 <input 
                   type="range" 
@@ -206,38 +206,38 @@
                 />
                 <span id="outcome-score-val" style="font-size: 1.25rem; font-weight: 800; color: var(--outcome-achieved); min-width: 50px; text-align: right;">8/10</span>
               </div>
-              <div class="form-hint">Quantify the success or execution quality of this decision.</div>
+              <div class="form-hint">Rate how well this decision worked out on a scale of 1 to 10.</div>
             </div>
 
             <!-- Field 4: Lesson Learned -->
             <div class="form-group">
               <label for="lessonLearned" class="form-label">
-                Lessons Learned & Mental Model Calibration <span style="color: var(--outcome-failed);">*</span>
+                Lesson Learned <span style="color: var(--outcome-failed);">*</span>
               </label>
               <textarea 
                 id="lessonLearned" 
                 name="lessonLearned" 
                 class="form-control" 
                 rows="4" 
-                placeholder="What did you misjudge? What cognitive blind spot or unexpected external factor emerged? What heuristic will guide your next decision?"
+                placeholder="What did you learn from this? What would you do differently next time, or what surprised you?"
                 required
                 minlength="5"
               ></textarea>
-              <div class="form-hint">Reflect on your heuristics. This lesson will be indexed in your Lessons Library.</div>
+              <div class="form-hint">This tip will be saved in your Lessons page to help you make better choices later.</div>
             </div>
 
             <!-- Immutability Warning -->
             <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-md); padding: 1rem; margin-bottom: 2rem; display: flex; gap: 0.75rem; align-items: center;">
               <span style="font-size: 1.25rem; color: var(--outcome-failed);">🔒</span>
               <span style="font-size: 0.85rem; color: #991b1b; line-height: 1.4;">
-                <strong>Warning:</strong> Submitting this review permanently commits your evaluation to the audit ledger. The decision will be locked and cannot be edited or re-reviewed.
+                <strong>Note:</strong> Once you submit this review, it cannot be changed. This keeps your decision journal truthful and helps you learn.
               </span>
             </div>
 
             <!-- Form Actions -->
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
               <button type="submit" class="btn btn-primary" id="btn-submit-review" style="width: 100%; padding: 0.875rem; font-size: 1rem; font-weight: 700;">
-                Finalize Review & Lock Decision 🔒
+                Save Review & Lock Decision 🔒
               </button>
               <a href="/" id="btn-cancel-review" class="btn btn-secondary" style="width: 100%; text-align: center;">
                 Cancel & Return

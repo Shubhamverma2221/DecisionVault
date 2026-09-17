@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         kpiCalibrationGap.textContent = `0%`;
         kpiCalibrationGap.style.color = '#16a34a'; // Calibrated: Green
-        kpiCalibrationSubtext.textContent = `Well Calibrated`;
+        kpiCalibrationSubtext.textContent = `Accurate Confidence`;
       }
 
       // Render Review Reminders Banner
@@ -124,8 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="reminder-banner-content">
             <span style="font-size: 1.5rem;">⚠️</span>
             <div>
-              <strong style="color: #b91c1c; font-size: 0.95rem;">You have ${overdue.length} decision(s) overdue for retrospective review!</strong>
-              <p style="margin: 0; font-size: 0.85rem; color: #7f1d1d;">Confront reality with your original hypothesis to neutralize hindsight bias.</p>
+              <strong style="color: #b91c1c; font-size: 0.95rem;">You have ${overdue.length} decision(s) ready for review!</strong>
+              <p style="margin: 0; font-size: 0.85rem; color: #7f1d1d;">Compare what really happened with what you expected.</p>
             </div>
           </div>
           <a href="/review.html?id=${overdue[0]._id}" class="btn btn-danger btn-sm">Review Now: ${escapeHTML(overdue[0].title.substring(0, 30))}...</a>

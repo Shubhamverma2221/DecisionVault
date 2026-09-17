@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       realityCard.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
           <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <span style="font-weight: 700; color: var(--outcome-achieved); font-size: 1.1rem;">2. Empirical Reality</span>
+            <span style="font-weight: 700; color: var(--outcome-achieved); font-size: 1.1rem;">2. What Actually Happened</span>
             <span class="badge ${resultBadgeClass}">${d.review.result}</span>
             ${scoreBadge}
           </div>
@@ -227,14 +227,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
 
         <div style="margin-bottom: 1.25rem;">
-          <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem;">Actual Empirical Outcome</div>
+          <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem;">Actual Result</div>
           <p style="background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.875rem; margin: 0; line-height: 1.5;">
             ${escapeHTML(d.review.actualOutcome)}
           </p>
         </div>
 
         <div>
-          <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem;">Lessons Learned & Mental Model Calibration</div>
+          <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem;">Lesson Learned</div>
           <p style="background: #f0fdf4; border-left: 3px solid var(--outcome-achieved); padding: 0.875rem; margin: 0; line-height: 1.5; color: #14532d; font-style: italic; border-radius: 0 var(--radius-md) var(--radius-md) 0;">
             “${escapeHTML(d.review.lessonLearned)}”
           </p>
@@ -246,16 +246,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       realityCard.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
-          <span style="font-weight: 700; color: var(--status-due); font-size: 1.1rem;">2. Empirical Reality</span>
+          <span style="font-weight: 700; color: var(--status-due); font-size: 1.1rem;">2. Review Decision</span>
           <span class="badge ${isDue ? 'badge-due' : 'badge-pending'}">${isDue ? 'Review Due' : 'Pending Review'}</span>
         </div>
 
         <div style="text-align: center; padding: 1.5rem 1rem;">
           <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1rem;">
-            Target Review Date: <strong>${formatDate(d.reviewDate)}</strong> (${daysText})
+            Review Date: <strong>${formatDate(d.reviewDate)}</strong> (${daysText})
           </p>
           <a href="/review.html?id=${d._id}" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
-            ${isDue ? 'Confront Reality & Conduct Review Now 🔒' : 'Conduct Early Retrospective Review 🔒'}
+            ${isDue ? 'Review Decision Now 🔒' : 'Review Decision Early 🔒'}
           </a>
         </div>
       `;
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (isReviewed) {
         replayStepContent.innerHTML = `
           <div style="background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
-            <p style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">Empirical Reality:</p>
+            <p style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">The Actual Result:</p>
             <p style="font-size: 1rem; line-height: 1.5; color: var(--text-primary); font-weight: 500;">
               ${escapeHTML(d.review.actualOutcome)}
             </p>
@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         replayStepContent.innerHTML = `
           <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
             <p style="font-size: 1rem; color: #9a3412;">This decision has not yet been reviewed.</p>
-            <a href="/review.html?id=${d._id}" class="btn btn-primary btn-sm" style="margin-top: 0.75rem;">Conduct Review Now</a>
+            <a href="/review.html?id=${d._id}" class="btn btn-primary btn-sm" style="margin-top: 0.75rem;">Review Now</a>
           </div>
         `;
       }
@@ -408,12 +408,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         replayStepContent.innerHTML = `
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: var(--radius-md); padding: 1.25rem; text-align: center;">
-              <span style="font-size: 0.8rem; text-transform: uppercase; color: #4338ca; font-weight: 700; display: block; margin-bottom: 0.5rem;">Target Hypothesis</span>
+              <span style="font-size: 0.8rem; text-transform: uppercase; color: #4338ca; font-weight: 700; display: block; margin-bottom: 0.5rem;">What You Expected</span>
               <div style="font-size: 1.75rem; font-weight: 800; color: #3730a3; margin-bottom: 0.5rem;">${d.confidence}%</div>
               <p style="font-size: 0.85rem; color: #4338ca; margin: 0;">${escapeHTML(d.expectedOutcome)}</p>
             </div>
             <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-md); padding: 1.25rem; text-align: center;">
-              <span style="font-size: 0.8rem; text-transform: uppercase; color: #166534; font-weight: 700; display: block; margin-bottom: 0.5rem;">Observed Reality</span>
+              <span style="font-size: 0.8rem; text-transform: uppercase; color: #166534; font-weight: 700; display: block; margin-bottom: 0.5rem;">What Happened</span>
               <div style="margin: 0.5rem 0;">
                 <span class="badge ${outcomeBadge}" style="font-size: 1.1rem; padding: 0.35rem 0.75rem;">${d.review.result}</span>
               </div>
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         replayStepContent.innerHTML = `
           <div style="background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; text-align: center;">
-            <p style="color: var(--text-muted);">Awaiting empirical outcome review to compare prediction vs. reality.</p>
+            <p style="color: var(--text-muted);">This decision has not been reviewed yet.</p>
           </div>
         `;
       }

@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       showToast(error.message || 'Failed to record decision', 'error');
       btnSubmit.disabled = false;
-      btnSubmit.textContent = 'Record Decision & Lock Hypothesis';
+      btnSubmit.textContent = 'Save Decision';
     }
   });
 });

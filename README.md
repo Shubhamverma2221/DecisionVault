@@ -1,32 +1,33 @@
-# DecisionVault — Your Decisions Have a History
+# DecisionVault — Track Your Choices & Learn From Results
 
-> **A Multi-User Cognitive Decision Tracking & Empirical Calibration Platform**  
-> Confront past hypotheses with present reality. Neutralize hindsight bias. Calibrate subjective confidence against objective results.
+> **A simple, beautiful decision journal that helps you make smarter choices and learn from experience.**  
+> Write down your decision today, check back later to see what really happened, and build your own library of wisdom.
 
 [![Node.js](https://img.shields.io/badge/Node.js-v18+-68a063.svg)](https://nodejs.org)
 [![Express](https://img.shields.io/badge/Express-v4.19-lightgrey.svg)](https://expressjs.com)
-[![MongoDB](https://img.shields.io/badge/MongoDB-v6.0+-green.svg)](https://www.mongodb.com)
-[![Theme](https://img.shields.io/badge/Theme-Light%20Mode%20Only-f8fafc.svg)](#light-mode-design-system)
-[![Auth](https://img.shields.io/badge/Auth-JWT%20%7C%20Google%20%7C%20Guest-6366f1.svg)](#multi-user-authentication)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas%20%7C%20Local-green.svg)](https://www.mongodb.com)
+[![Theme](https://img.shields.io/badge/Design-Clean%20Light%20Mode-f8fafc.svg)](#design)
+[![Auth](https://img.shields.io/badge/Auth-Email%20%7C%20Google%20%7C%20Guest-6366f1.svg)](#how-it-works)
 
 ---
 
-## The Philosophy: Why DecisionVault?
+## Why DecisionVault?
 
-Human memory is inherently reconstructive. When an outcome occurs, we suffer from **hindsight bias** (*"I knew it all along"*), conveniently forgetting the doubts, alternative options, and flawed assumptions we held at the moment of decision. Furthermore, we fall victim to the **overconfidence effect**, regularly operating with 85% certainty while achieving only 50% success.
+Whenever we make a big decision — whether in career, money, coding, or life — two things usually happen:
 
-**DecisionVault fixes the feedback loop of human judgment.**
+1. **We forget what we were actually thinking:** Months later, when things go well or badly, we tell ourselves *"I knew that would happen all along!"* Even though at the time, we were guessing or unsure.
+2. **We repeat the same mistakes:** Without reviewing what actually happened versus what we expected, we never really learn.
 
-By enforcing a **two-milestone chronological model**, DecisionVault permanently records your premises *before* reality unfolds, locks the record upon retrospective review, and computes your mathematical **Calibration Gap** so you can systematically upgrade your mental models.
+**DecisionVault fixes this in 2 simple steps:**
 
 ```
- Milestone 1: Genesis                       Milestone 2: Reality
+  Step 1: Make Your Decision               Step 2: Review What Happened
 ┌─────────────────────────────────┐        ┌──────────────────────────────────┐
-│ • Alternatives Considered (≥2)  │        │ • Concrete Empirical Reality     │
-│ • Weighted Criteria Matrix      │        │ • Outcome (Achieved / Failed)    │
-│ • Core Reasoning & Hypothesis   │ ─────> │ • Quantitative Score (1–10)      │
-│ • Concrete Expected Outcome     │ (Time) │ • Lessons Learned & Bias Audit   │
-│ • Confidence Score (0–100%)     │        │ • Permanent Historical Lock 🔒   │
+│ • List your options             │        │ • Write down what actually       │
+│ • Pick the best one & why       │        │   happened in real life          │
+│ • Set what you expect to happen │ ─────> │ • Rate how it went (1 to 10)     │
+│ • Pick your confidence (0-100%) │ (Time) │ • Save what you learned for next │
+│ • Choose a review date          │        │   time                           │
 └─────────────────────────────────┘        └──────────────────────────────────┘
 ```
 
@@ -34,74 +35,76 @@ By enforcing a **two-milestone chronological model**, DecisionVault permanently 
 
 ## Key Features
 
-### 1. Multi-User Authentication Suite
-- **Email + Password Registration:** Full registration with bcrypt salt & hash encryption.
-- **JWT Authorization:** Stateless Bearer tokens with strict user isolation across all records.
-- **Guest Mode:** Instant one-click demo login with full CRUD privileges.
-- **In-Place Guest Migration:** Upgrade a guest session to a permanent account at any time without losing any decisions.
-- **Google Sign-In Ready:** Modular OAuth/Google Identity client integration.
+### 1. Easy Sign In
+- **Try as Guest:** Start using the app immediately with 1 click — no sign up required.
+- **Save Your Account:** If you start as a guest, you can create an email and password anytime without losing your saved decisions.
+- **Email & Password or Google:** Secure login so your personal decisions remain private to you.
 
-### 2. Decision Genesis & Weighted Matrix
-- **Multi-Option Weighing:** Compare at least 2 distinct alternatives before committing.
-- **Weighted Criteria Scoring:** Define evaluation criteria (e.g. Speed, Cost, Scalability) with custom weights ($\sum \text{weight} = 100\%$) and calculate composite scores for each option.
-- **Subjective Confidence Slider:** Record your calibrated certainty (0–100%) prior to the outcome.
-- **Tags & Categorization:** Organize by Technology, Career, Finance, Product, Life, and Health.
+### 2. Simple Decision Making
+- **Compare Choices:** Add 2 or more options and pick the one that fits best.
+- **Optional Scoring Matrix:** Rate each option on criteria like cost, time, or ease to find the clear winner.
+- **Confidence Slider:** Set how sure you feel (0% to 100%) so you can see if you tend to be too sure or too cautious.
+- **Categories & Tags:** Organize your choices by Career, Money, Tech, Health, Projects, and more.
 
-### 3. Retrospective Review & Empirical Confrontation
-- **Due Date Reminders:** Automated banner alerts for decisions awaiting evaluation.
-- **Empirical Reality Confrontation:** Review what actually happened side-by-side with your initial expectations.
-- **Outcome Assessment:** Categorize results as `Achieved`, `Partially Achieved`, or `Not Achieved` with a 1–10 quantitative score.
-- **Lessons Learned:** Capture timeless takeaways to calibrate future decisions.
+### 3. Review When Ready
+- **Friendly Reminders:** A clear banner lets you know when a decision is ready for review.
+- **Compare Expectations vs. Reality:** See what you originally hoped for right next to what actually took place.
+- **Rate the Result:** Mark whether it was Achieved, Partially Achieved, or Not Achieved.
+- **Locked for Honesty:** Once reviewed, the decision is locked so you can always trust your past records.
 
-### 4. Decision Replay Mode
-- Step through your decision like a flight recorder:
-  1. **What You Believed:** Initial options, chosen alternative, confidence, and reasoning.
-  2. **What Actually Happened:** Retrospective review and reality comparison.
-  3. **Prediction vs. Reality:** Outcome status, accuracy differential, and score.
-  4. **The Lesson Learned:** The lasting principle for your personal playbook.
+### 4. Decision Replay
+- Click **"Replay Decision"** to walk through your decision step-by-step:
+  1. What you were thinking when you made the choice.
+  2. What really happened.
+  3. The difference between expectation and reality.
+  4. The lesson you wrote down.
 
-### 5. Lessons Library & Decision Calendar
-- **Lessons Library (`lessons.html`):** A centralized knowledge base of all your historical lessons, filterable by category and searchable.
-- **Decision Calendar (`calendar.html`):** Interactive monthly calendar view highlighting decision genesis dates, review due dates, and completed reviews.
-- **Data Portability:** 1-click export of all decisions to **JSON** or **CSV** formats.
+### 5. Lessons Page & Calendar
+- **Lessons Learned (`lessons.html`):** A collection of all the tips and takeaways you have learned from your past choices, searchable by topic.
+- **Calendar (`calendar.html`):** View all your decision dates on a clean monthly calendar.
+- **Export Data:** Download all your decisions anytime as a **JSON** or **CSV** file.
 
-### 6. Light Mode Only Design System
-- Built strictly with a clean, modern **Light Mode aesthetic**:
-  - Background Canvas: Crisp soft slate (`#f8fafc`)
-  - Elevated Cards: Pure white (`#ffffff`) with subtle hairline borders (`#e2e8f0`)
-  - Typography: Deep charcoal slate (`#0f172a` and `#334155`)
-  - Accent Palette: Indigo (`#4f46e5`), Emerald (`#059669`), Amber (`#d97706`), and Rose (`#e11d48`)
-  - Zero dark mode styles or toggles.
+### 6. Clean, Beautiful Design
+- Designed strictly with a crisp, easy-on-the-eyes **Light Theme**:
+  - Soft background and pure white cards with smooth borders.
+  - High-contrast typography that is easy to read on mobile and desktop.
+  - Clear, colorful status badges so you always know what needs your attention.
 
 ---
 
 ## Tech Stack
 
-* **Backend:** Node.js, Express 4, Mongoose 8, MongoDB, `bcryptjs`, `jsonwebtoken`
-* **Frontend:** Vanilla ES6+ JavaScript, CSS3 Design Tokens, Semantic HTML5
-* **Security:** Strict per-user database scoping (`userId: req.user._id`), JWT auth middleware, sanitized inputs, and input validation.
+- **Backend:** Node.js, Express, MongoDB (Mongoose), JWT, bcryptjs
+- **Frontend:** Plain HTML5, Modern CSS, Vanilla JavaScript (Fast, lightweight, no heavy frameworks)
+- **Deployment:** Ready for Vercel and MongoDB Atlas
 
 ---
 
-## Quickstart
+## Quick Start (Run Locally)
 
-### Prerequisites
-- Node.js (v18+)
-- MongoDB running locally at `mongodb://127.0.0.1:27017`
+### Requirements
+- Node.js (v18 or higher)
+- A free MongoDB Atlas database URL or local MongoDB
 
-### Setup & Run
+### Setup Steps
 ```bash
-# Clone or navigate to the directory
+# 1. Clone the repository
+git clone https://github.com/Shubhamverma2221/DecisionVault.git
 cd DecisionVault
 
-# Install dependencies
+# 2. Install dependencies
 npm install
 
-# Configure environment (defaults work out of the box)
+# 3. Create your .env file
 cp .env.example .env
 
-# Start development server
+# 4. Start the app
 npm run dev
 ```
 
-Visit **`http://localhost:5000`** in your browser.
+Open your browser and visit: **`http://localhost:5000`**
+
+---
+
+## License
+MIT License. Free to use, modify, and share!

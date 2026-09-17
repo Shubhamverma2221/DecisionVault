@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="DecisionVault — Your Decisions Have a History. Document hypotheses, evaluate empirical outcomes, and calibrate cognitive confidence.">
+  <meta name="description" content="DecisionVault — Your Decisions Have a History. Record decisions, see how they turned out, and improve your judgment.">
   <title>Dashboard — DecisionVault</title>
 
   <!-- Google Fonts: Outfit, Inter & JetBrains Mono -->
@@ -49,7 +49,7 @@
     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
       <div>
         <h1 style="font-size: 2.25rem; margin-bottom: 0.35rem;">Decision Dashboard</h1>
-        <p style="color: var(--text-secondary); margin: 0;">Audit your premises, track outcomes, and calibrate your predictive judgment.</p>
+        <p style="color: var(--text-secondary); margin: 0;">See all your decisions, track results, and learn from experience.</p>
       </div>
       <div style="display: flex; gap: 0.5rem;">
         <button type="button" class="btn btn-secondary btn-sm" id="btn-export-json">Export JSON</button>
@@ -62,17 +62,17 @@
       <div class="stat-card">
         <div class="stat-card-label">Total Decisions</div>
         <div class="stat-card-value" id="kpi-total">0</div>
-        <div class="stat-card-subtext">Active & documented</div>
+        <div class="stat-card-subtext">All decisions saved</div>
       </div>
       <div class="stat-card">
         <div class="stat-card-label">Reviews Due</div>
         <div class="stat-card-value" style="color: var(--status-due);" id="kpi-due">0</div>
-        <div class="stat-card-subtext">Ready for reality audit</div>
+        <div class="stat-card-subtext">Ready to be reviewed</div>
       </div>
       <div class="stat-card">
         <div class="stat-card-label">Pending Reviews</div>
         <div class="stat-card-value" style="color: var(--status-pending);" id="kpi-pending">0</div>
-        <div class="stat-card-subtext">Maturing hypotheses</div>
+        <div class="stat-card-subtext">Waiting for review date</div>
       </div>
       <div class="stat-card">
         <div class="stat-card-label">Success Rate</div>
@@ -80,9 +80,9 @@
         <div class="stat-card-subtext" id="kpi-reviewed-subtext">0 of 0 reviewed</div>
       </div>
       <div class="stat-card">
-        <div class="stat-card-label">Calibration Gap</div>
+        <div class="stat-card-label">Confidence vs Reality</div>
         <div class="stat-card-value" id="kpi-calibration-gap">0%</div>
-        <div class="stat-card-subtext" id="kpi-calibration-subtext">Confidence vs. Reality</div>
+        <div class="stat-card-subtext" id="kpi-calibration-subtext">How accurate you were</div>
       </div>
     </section>
 

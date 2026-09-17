@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (isAlreadyReviewed) {
       headerStatusBadge.className = 'badge badge-reviewed';
-      headerStatusBadge.textContent = 'Reviewed & Sealed';
+      headerStatusBadge.textContent = 'Reviewed & Locked';
 
       reviewActiveContainer.style.display = 'none';
       alreadyReviewedCard.style.display = 'block';
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     contextDecisionTitle.textContent = d.title;
-    contextConfidenceBadge.textContent = `${d.confidence}% Initial Confidence`;
+    contextConfidenceBadge.textContent = `${d.confidence}% Confidence`;
     contextReviewDate.textContent = `${formatDate(d.reviewDate)} (${getDaysRemaining(d.reviewDate)})`;
     contextSelectedOption.textContent = d.selectedOption;
     contextReasoning.textContent = d.reasoning;
@@ -134,18 +134,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const outcomeScore = Number(outcomeScoreInput.value);
 
     if (!actualOutcome || actualOutcome.length < 5) {
-      showToast('Please document what actually happened (at least 5 characters).', 'error');
+      showToast('Please describe what actually happened (at least 5 characters).', 'error');
       actualOutcomeInput.focus();
       return;
     }
 
     if (!selectedRadio) {
-      showToast('Please select an outcome evaluation: Achieved, Partially Achieved, or Not Achieved.', 'error');
+      showToast('Please select how it turned out: Achieved, Partially Achieved, or Not Achieved.', 'error');
       return;
     }
 
     if (!lessonLearned || lessonLearned.length < 5) {
-      showToast('Please document lessons learned for future calibration (at least 5 characters).', 'error');
+      showToast('Please write what you learned for next time (at least 5 characters).', 'error');
       lessonLearnedInput.focus();
       return;
     }
@@ -158,11 +158,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     btnSubmitReview.disabled = true;
-    btnSubmitReview.textContent = 'Committing & Sealing Review... 🔒';
+    btnSubmitReview.textContent = 'Saving Review... 🔒';
 
     try {
       await API.reviewDecision(decisionId, payload);
-      showToast('Retrospective review finalized! Decision is permanently locked.', 'success');
+      showToast('Review saved! Decision is now locked.', 'success');
 
       setTimeout(() => {
         window.location.href = `/decision.html?id=${decisionId}`;
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
       showToast(error.message || 'Failed to submit review', 'error');
       btnSubmitReview.disabled = false;
-      btnSubmitReview.textContent = 'Finalize Review & Lock Decision 🔒';
+      btnSubmitReview.textContent = 'Save Review & Lock Decision 🔒';
     }
   });
 });
