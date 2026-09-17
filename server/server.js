@@ -76,13 +76,17 @@ app.use(errorHandler);
 // =========================================
 
 const PORT = process.env.PORT || 5000;
+let server;
 
-const server = app.listen(PORT, () => {
-  console.log(`=========================================`);
-  console.log(` DecisionVault Multi-User Server Running on port ${PORT}`);
-  console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(` Health check: http://localhost:${PORT}/api/health`);
-  console.log(`=========================================`);
-});
+if (process.env.VERCEL !== '1') {
+  server = app.listen(PORT, () => {
+    console.log(`=========================================`);
+    console.log(` DecisionVault Multi-User Server Running on port ${PORT}`);
+    console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(` Health check: http://localhost:${PORT}/api/health`);
+    console.log(`=========================================`);
+  });
+}
 
-module.exports = { app, server };
+module.exports = app;
+module.exports.server = server;

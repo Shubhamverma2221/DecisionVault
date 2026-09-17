@@ -4,9 +4,15 @@ const mongoose = require('mongoose');
  * Establishes connection to MongoDB using Mongoose ODM.
  * Reads connection URI from process.env.MONGODB_URI.
  */
+let isConnected = false;
+
 const connectDB = async () => {
+  if (isConnected || mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI);
+    isConnected = true;
 
     console.log(`=========================================`);
     console.log(` MongoDB Connected Successfully!`);
@@ -22,6 +28,7 @@ const connectDB = async () => {
 
     mongoose.connection.on('disconnected', () => {
       console.warn('MongoDB connection lost. Attempting reconnection...');
+      isConnected = false;
     });
 
     return conn;
@@ -30,8 +37,10 @@ const connectDB = async () => {
     console.error(` Error connecting to MongoDB: ${error.message}`);
     console.error(` Verify that MongoDB is running and MONGODB_URI in .env is correct.`);
     console.error(`=========================================`);
-    // Exit process with failure code (1) if initial database connection fails
-    process.exit(1);
+    if (process.env.VERCEL !== '1') {
+      process.exit(1);
+    }
+    throw error;
   }
 };
 
