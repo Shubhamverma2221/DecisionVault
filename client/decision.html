@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View decision details, original premises, confidence calibration, and retrospective timeline history.">
+  <title>Decision History — DecisionVault</title>
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="/" class="brand-logo" id="brand-link">
+        <div class="brand-icon">DV</div>
+        <span>DecisionVault</span>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link" id="nav-dashboard">Dashboard</a></li>
+          <li><a href="/new-decision.html" class="btn btn-primary" id="btn-create-nav">+ New Decision</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+    
+    <!-- Top Breadcrumb Navigation & Action Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">← Back to Dashboard</a>
+      
+      <!-- Action Buttons Container -->
+      <div id="decision-actions" style="display: flex; gap: 0.75rem; align-items: center;">
+        <button type="button" class="btn btn-danger" id="btn-delete-decision" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+          Delete Decision
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="spinner" id="loading-spinner"></div>
+
+    <!-- Decision Details Content View (Populated by decision.js) -->
+    <div id="decision-content" style="display: none;">
+      
+      <!-- Hero Header -->
+      <section style="margin-bottom: 3rem; text-align: center;">
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <span class="badge badge-pending" id="badge-status">Status</span>
+          <span id="badge-outcome-container"></span>
+        </div>
+        <h1 id="decision-title" style="font-size: 2.5rem; max-width: 850px; margin: 0 auto 1rem;">--</h1>
+        <p id="decision-description" style="max-width: 700px; margin: 0 auto; font-size: 1.05rem;"></p>
+      </section>
+
+      <!-- Visual History Timeline Section (Feature 5) -->
+      <section class="timeline" id="timeline-container" aria-label="Decision Life Cycle Timeline">
+        
+        <!-- Milestone 1: Genesis Node -->
+        <div class="timeline-node" id="node-genesis">
+          <div class="timeline-marker"></div>
+          <div class="timeline-card">
+            <div class="timeline-card-header">
+              <span style="font-weight: 700; color: var(--accent-primary);">1. Decision Genesis</span>
+              <span class="timeline-date" id="genesis-date">Recorded: --</span>
+            </div>
+
+            <div class="timeline-section-title">Options Considered & Selection</div>
+            <ul class="options-list" id="genesis-options">
+              <!-- Rendered options -->
+            </ul>
+
+            <div class="timeline-section-title">Core Reasoning</div>
+            <p class="timeline-content" id="genesis-reasoning">--</p>
+
+            <div class="confidence-meter" style="margin-top: 1.5rem;">
+              <div class="meter-header">
+                <span>Confidence Calibration</span>
+                <span id="genesis-confidence" style="font-weight: 700; color: var(--accent-primary);">--%</span>
+              </div>
+              <div class="meter-bar">
+                <div class="meter-fill" id="genesis-confidence-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="timeline-section-title">Expected Outcome (The Hypothesis)</div>
+            <div style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-md); border-left: 3px solid var(--accent-primary); margin-top: 0.5rem;">
+              <p class="timeline-content" id="genesis-expected" style="font-weight: 500; color: var(--text-primary);">--</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Milestone 2: Retrospective Reflection Node -->
+        <div class="timeline-node" id="node-review">
+          <div class="timeline-marker"></div>
+          <div class="timeline-card" id="review-card-content">
+            <!-- Dynamically populated: either reviewed reflection or pending review call-to-action -->
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Global Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>DecisionVault — Your Decisions Have a History. Built with Vanilla Web Standards & MongoDB.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/js/api.js"></script>
+  <script src="/js/decision.js"></script>
+</body>
+</html>
