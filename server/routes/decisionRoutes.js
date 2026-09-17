@@ -6,7 +6,8 @@ const {
   getDecisions,
   getDecisionById,
   updateDecision,
-  deleteDecision
+  deleteDecision,
+  reviewDecision
 } = require('../controllers/decisionController');
 
 // =========================================
@@ -25,5 +26,10 @@ router
   .get(getDecisionById)
   .put(updateDecision)
   .delete(deleteDecision);
+
+// Specialized review endpoint: /api/decisions/:id/review
+router
+  .route('/:id/review')
+  .post(reviewDecision);
 
 module.exports = router;

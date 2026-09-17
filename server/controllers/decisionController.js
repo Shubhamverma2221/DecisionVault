@@ -226,10 +226,81 @@ const deleteDecision = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Submit retrospective review for a decision
+ * @route   POST /api/decisions/:id/review
+ * @access  Public
+ */
+const reviewDecision = async (req, res, next) => {
+  try {
+    const { actualOutcome, result, lessonLearned } = req.body;
+
+    const decision = await Decision.findById(req.params.id);
+
+    if (!decision) {
+      return res.status(404).json({
+        success: false,
+        error: `Decision not found with ID: ${req.params.id}`
+      });
+    }
+
+    // Business Logic Rule: Duplicate Review Prevention
+    // A decision can only be reviewed once. Once reviewed, it is permanently locked.
+    if (decision.review && decision.review.result) {
+      return res.status(400).json({
+        success: false,
+        error: 'This decision has already been reviewed and evaluated. Reviews cannot be overwritten.'
+      });
+    }
+
+    // Explicit payload validation before attaching
+    if (!actualOutcome || !actualOutcome.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide what actually happened (actualOutcome is required).'
+      });
+    }
+
+    if (!result) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please evaluate whether the expected outcome was Achieved, Partially Achieved, or Not Achieved.'
+      });
+    }
+
+    if (!lessonLearned || !lessonLearned.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please document what you learned from this decision (lessonLearned is required).'
+      });
+    }
+
+    // Attach embedded review subdocument
+    decision.review = {
+      actualOutcome: actualOutcome.trim(),
+      result,
+      lessonLearned: lessonLearned.trim(),
+      reviewedAt: new Date()
+    };
+
+    // Save document to trigger Mongoose embedded schema validation
+    await decision.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Decision review recorded successfully',
+      data: decision
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createDecision,
   getDecisions,
   getDecisionById,
   updateDecision,
-  deleteDecision
+  deleteDecision,
+  reviewDecision
 };
